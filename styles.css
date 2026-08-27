@@ -296,25 +296,86 @@ main { position: relative; z-index: 2; }
   .status-pill .dot::after { animation: none; opacity: 0; }
 }
 
-/* ---------- Platforms marquee (the painful pairs) ---------- */
-.marquee-band { padding: clamp(28px, 4vw, 40px) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg); overflow: hidden; }
-.marquee-lead { text-align: center; color: var(--text-faint); font-size: .82rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 22px; }
-.marquee { position: relative; display: flex; overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
-.marquee-track { display: flex; gap: 14px; padding-right: 14px; flex-shrink: 0; animation: scroll 34s linear infinite; }
-.marquee:hover .marquee-track { animation-play-state: paused; }
-@keyframes scroll { to { transform: translateX(-100%); } }
-.pair {
-  display: inline-flex; align-items: center; gap: 12px; flex-shrink: 0;
-  padding: 12px 20px; border: 1px solid var(--line); border-radius: var(--pill);
-  background: var(--surface-1); color: var(--text); font-weight: 550; font-size: .96rem; white-space: nowrap;
+/* ---------- Platforms mesh (every device, exchanging directly) ---------- */
+.mesh-band { padding: clamp(30px, 5vw, 52px) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg); overflow: hidden; }
+.mesh-lead { text-align: center; color: var(--text-faint); font-size: .82rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin-bottom: clamp(20px, 3vw, 30px); }
+.mesh-cap { text-align: center; color: var(--text-muted); font-size: .98rem; max-width: 46ch; margin: clamp(22px, 3vw, 34px) auto 0; }
+
+/* stage reserves the scaled footprint via aspect-ratio; mesh is a fixed 900x260
+   coordinate space scaled to fit, so each packet's offset-path lands on its node. */
+.mesh-wrap { position: relative; width: 100%; max-width: 900px; margin: 0 auto; }
+.mesh-stage { position: relative; width: 100%; aspect-ratio: 900 / 260; }
+.mesh { position: absolute; left: 50%; top: 50%; width: 900px; height: 260px;
+  transform: translate(-50%, -50%) scale(var(--s, 1)); }
+
+.mesh-links { position: absolute; inset: 0; width: 900px; height: 260px; overflow: visible; }
+.mesh-links .ln { fill: none; stroke: color-mix(in srgb, var(--accent) 26%, transparent); stroke-width: 1.5; stroke-linecap: round; }
+
+/* device nodes: a rounded tile anchored at its (x,y) centre, name below */
+.node { position: absolute; left: var(--x); top: var(--y); width: 58px; height: 58px; transform: translate(-50%, -50%); }
+.node-tile {
+  position: relative; z-index: 2; width: 100%; height: 100%;
+  border-radius: 16px; background: var(--surface-1); border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow); display: grid; place-items: center;
 }
-.pair svg { width: 20px; height: 20px; color: var(--text-muted); }
-.pair .arrow { width: 16px; height: 16px; color: var(--accent); }
+.node-tile svg { width: 27px; height: 27px; color: var(--text-muted); }
+.node-name {
+  position: absolute; top: calc(100% + 9px); left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: .78rem; font-weight: 600; color: var(--text-faint);
+}
+.node-ping {
+  position: absolute; inset: -1px; z-index: 1; border-radius: 18px;
+  border: 2px solid var(--accent); opacity: 0;
+}
+.node.pinging .node-ping { animation: ping 3.6s var(--ease) infinite; }
+.node[data-ping="0"] .node-ping { animation-delay: 2.1s; }   /* Windows  <- b1 */
+.node[data-ping="1"] .node-ping { animation-delay: 1.25s; }  /* iPhone   <- b4 */
+.node[data-ping="2"] .node-ping { animation-delay: 3.0s; }   /* Mac      <- b2 */
+.node[data-ping="3"] .node-ping { animation-delay: 0.35s; }  /* Linux    <- b3 */
+@keyframes ping {
+  0%   { opacity: .8; transform: scale(1); }
+  22%  { opacity: 0; transform: scale(1.55); }
+  100% { opacity: 0; transform: scale(1.55); }
+}
+
+/* encrypted packets: reuse .packet-card / .packet-lock, ride the link curves */
+.beam {
+  position: absolute; top: 0; left: 0; z-index: 5;
+  width: 34px; height: 40px; margin: -20px 0 0 -17px;
+  offset-rotate: 0deg; animation: hop2 3.6s cubic-bezier(.5, 0, .5, 1) infinite;
+  filter: drop-shadow(0 5px 12px rgba(var(--accent-glow), .4));
+}
+.beam .packet-card .file { width: 13px; height: 16px; }
+.beam .packet-lock { width: 17px; height: 17px; top: -7px; right: -7px; }
+.beam .packet-lock svg { width: 9px; height: 9px; }
+.b1 { offset-path: path("M95,158 C210,70 350,80 460,178"); }
+.b2 { offset-path: path("M285,66 C400,26 520,26 640,70"); animation-delay: .9s; }
+.b3 { offset-path: path("M460,178 C570,240 720,235 818,150"); animation-delay: 1.8s; }
+.b4 { offset-path: path("M640,70 C520,26 400,26 285,66"); animation-delay: 2.7s; }
+@keyframes hop2 {
+  0%   { offset-distance: 0%;   opacity: 0; transform: scale(.6); }
+  9%   { opacity: 1; transform: scale(1); }
+  55%  { offset-distance: 100%; opacity: 1; transform: scale(1); }
+  66%  { offset-distance: 100%; opacity: 0; transform: scale(.6); }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* mobile-safe static fallback (shown < 720px; the scaled stage gets too small) */
+.mesh-fallback { display: none; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 480px; margin: 0 auto; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 15px; border: 1px solid var(--line); border-radius: var(--pill);
+  background: var(--surface-1); color: var(--text); font-weight: 550; font-size: .9rem; white-space: nowrap;
+}
+.chip svg { width: 18px; height: 18px; color: var(--text-muted); }
+
+@media (max-width: 720px) {
+  .mesh-stage { display: none; }
+  .mesh-fallback { display: flex; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track { animation: none; flex-wrap: wrap; justify-content: center; }
-  .marquee { mask-image: none; -webkit-mask-image: none; }
+  .beam { animation: none; offset-distance: 50%; }
+  .node.pinging .node-ping { animation: none; opacity: 0; }
 }
 
 /* ---------- How it works: sticky scroller ---------- */
