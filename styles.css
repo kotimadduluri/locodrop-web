@@ -296,6 +296,14 @@ main { position: relative; z-index: 2; }
   .status-pill .dot::after { animation: none; opacity: 0; }
 }
 
+/* Off-screen animation pause (perf + calm): only the section in view animates. JS toggles .anim-paused when
+   a section scrolls out of the viewport; reduced-motion already disables these animations entirely. */
+.anim-paused .packet,
+.anim-paused .link-flow,
+.anim-paused .status-pill .dot::after,
+.anim-paused .beam,
+.anim-paused .node-ping { animation-play-state: paused; }
+
 /* ---------- Platforms mesh (every device, exchanging directly) ---------- */
 .mesh-band { padding: clamp(30px, 5vw, 52px) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg); overflow: hidden; }
 .mesh-lead { text-align: center; color: var(--text-faint); font-size: .82rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; margin-bottom: clamp(20px, 3vw, 30px); }

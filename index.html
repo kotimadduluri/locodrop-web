@@ -357,6 +357,16 @@
         els.forEach(function (el) { io.observe(el); });
       }
 
+      // Pause each looping animation while its section is off-screen, so only the section in view animates
+      // (perf + calm — the hero demo and the mesh never run at the same time). Skipped under reduced motion.
+      if (!reduce && 'IntersectionObserver' in window) {
+        var animSections = document.querySelectorAll('.hero, .mesh-band');
+        var animIo = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { e.target.classList.toggle('anim-paused', !e.isIntersecting); });
+        }, { threshold: 0 });
+        animSections.forEach(function (el) { animIo.observe(el); });
+      }
+
       // Header hairline once scrolled
       var header = document.querySelector('.site-header');
       var onScroll = function () { header.classList.toggle('scrolled', window.scrollY > 8); };
