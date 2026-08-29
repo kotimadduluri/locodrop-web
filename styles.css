@@ -140,8 +140,13 @@ img, svg { display: block; }
 .btn-ghost { background: transparent; color: var(--text); border-color: var(--line-strong); }
 .btn-ghost:hover { border-color: var(--text); background: color-mix(in srgb, var(--text) 5%, transparent); }
 
-/* ---------- Header (floating pill nav) ---------- */
-.site-header { position: sticky; top: 14px; z-index: 50; }
+/* ---------- Header (floating pill nav — only appears once you scroll past the hero) ---------- */
+.site-header {
+  position: fixed; top: 14px; left: 0; right: 0; z-index: 50;
+  opacity: 0; transform: translateY(-12px); pointer-events: none;
+  transition: opacity .3s var(--ease), transform .3s var(--ease);
+}
+.site-header.scrolled { opacity: 1; transform: none; pointer-events: auto; }
 .header-inner {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   padding: 11px 12px 11px 20px;
@@ -548,16 +553,25 @@ main { position: relative; z-index: 2; }
 .hero-panel {
   position: relative; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--radius-lg);
-  min-height: 660px; box-shadow: var(--shadow-lift);
-  background: radial-gradient(120% 82% at 50% 6%, var(--surface-1) 0%, var(--surface-1) 32%,
-                             var(--bg-deep) 84%, var(--bg-deep) 100%);
+  min-height: 690px; box-shadow: var(--shadow-lift);
+  /* white top zone -> grey bottom zone; the object emerges from the grey */
+  background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-1) 38%,
+                             var(--bg-deep) 60%, var(--bg-deep) 100%);
 }
-.hero-pill { position: absolute; top: 22px; left: 24px; z-index: 6; margin: 0; }
+
+/* in-panel nav: links-pill left, CTA right, no logo (the wordmark is the brand) */
+.hero-nav {
+  position: relative; z-index: 6;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px 22px 0;
+}
+
+.hero-pill { position: static; margin: 0; align-self: flex-start; }
 
 .hero-word {
-  position: relative; z-index: 1; text-align: center; padding: 56px 40px 0;
+  position: relative; z-index: 1; text-align: center; padding: 18px 28px 0;
   font-family: var(--font-display); font-weight: 900;
-  font-size: clamp(56px, 12.4vw, 168px); line-height: .84; letter-spacing: -.05em;
+  font-size: clamp(58px, 14.6vw, 208px); line-height: .82; letter-spacing: -.055em;
   /* animated sheen sweep — the app name's transition effect */
   background: linear-gradient(100deg,
     var(--text) 0%, var(--text) 40%,
@@ -572,7 +586,7 @@ main { position: relative; z-index: 2; }
 
 /* stage sits ABOVE the wordmark — the object overlaps the letters, like the reference */
 .hero-stage { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none; }
-.orbwrap { position: relative; width: min(48vw, 480px); height: min(48vw, 480px); margin-top: 92px; }
+.orbwrap { position: relative; width: min(46vw, 470px); height: min(46vw, 470px); margin-top: 132px; }
 .orbwrap::after {
   content: ""; position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%);
   width: 56%; height: 7%; border-radius: 50%; filter: blur(7px);
@@ -604,10 +618,10 @@ main { position: relative; z-index: 2; }
 .rings .r-f2 { stroke: var(--line-strong); stroke-width: 1; opacity: .7; }
 
 .hero-midlist {
-  position: absolute; right: 34px; top: 150px; z-index: 4; list-style: none; margin: 0; padding: 0; text-align: right;
+  position: absolute; right: 30px; top: 44%; z-index: 4; list-style: none; margin: 0; padding: 0;
 }
 .hero-midlist li {
-  display: flex; gap: 22px; justify-content: flex-end; padding: 5px 0;
+  display: flex; gap: 18px; justify-content: flex-end; align-items: baseline; padding: 7px 0; min-width: 196px;
   font-size: 14px; font-weight: 500; color: var(--text-muted); border-bottom: 1px solid var(--line);
 }
 .hero-midlist b { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
@@ -624,12 +638,11 @@ main { position: relative; z-index: 2; }
 .hero-how .pl { display: block; font-size: 11px; margin-bottom: 3px; }
 
 .hero-foot {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: 26px 34px 30px;
-  display: flex; justify-content: space-between; align-items: flex-end; gap: 20px;
+  position: absolute; left: 0; bottom: 0; z-index: 4; padding: 0 34px 32px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 14px; max-width: 460px;
 }
-.hero-lede { max-width: 360px; }
-.hero-lede p { font-size: 16px; font-weight: 500; color: var(--text); line-height: 1.4; }
-.hero-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.hero-lede { max-width: 380px; margin: 0; font-size: 16px; font-weight: 500; color: var(--text); line-height: 1.4; }
+.hero-dots { font-family: var(--font-mono); color: var(--line-strong); font-size: 12px; letter-spacing: .16em; }
 
 @keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
 @keyframes heroSpin { to { transform: rotate(360deg); } }

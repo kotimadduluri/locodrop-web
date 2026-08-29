@@ -59,11 +59,21 @@
   <main id="main">
     <span id="top"></span>
 
-    <!-- HERO — signature wordmark + live WebGL centerpiece -->
+    <!-- HERO — ONE panel: integrated nav + full-width wordmark + centerpiece -->
     <section class="hero">
       <div class="wrap">
         <div class="hero-panel reveal">
-          <p class="status-pill hero-pill"><span class="dot" aria-hidden="true"></span>Early access, coming soon</p>
+          <!-- nav lives inside the panel; the giant wordmark is the brand, so no logo here -->
+          <nav class="hero-nav" aria-label="Primary">
+            <span class="nav-pill">
+              <a href="#how">How it works</a>
+              <a href="#why">Why LocoDrop</a>
+              <a href="#platforms">Platforms</a>
+              <a href="#faq">FAQ</a>
+            </span>
+            <a class="btn btn-sm btn-primary nav-cta" href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access">Get early access <span class="cta-ar" aria-hidden="true">→</span></a>
+          </nav>
+
           <h1 class="hero-word">LocoDrop<span class="dot">.</span></h1>
 
           <div class="hero-stage" aria-hidden="true">
@@ -86,21 +96,17 @@
           </div>
 
           <ul class="hero-midlist">
-            <li><b>/01</b> Local network</li>
-            <li><b>/02</b> Encrypted</li>
-            <li><b>/03</b> No account</li>
+            <li>Local network <b>/01</b></li>
+            <li>Encrypted <b>/02</b></li>
+            <li>No account <b>/03</b></li>
           </ul>
 
           <a class="hero-how" href="#how"><span class="pl" aria-hidden="true">▶</span><span>How it<br>works?</span></a>
 
           <div class="hero-foot">
-            <div class="hero-lede">
-              <p>Send files straight between your own devices. Encrypted, on your local network. No cloud, no account.</p>
-            </div>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access&amp;body=I'd%20like%20early%20access%20to%20LocoDrop.">Get early access</a>
-              <a class="btn btn-ghost" href="#how">See how it works</a>
-            </div>
+            <p class="status-pill hero-pill"><span class="dot" aria-hidden="true"></span>Early access, coming soon</p>
+            <p class="hero-lede">Send files straight between your own devices. Encrypted, on your local network. No cloud, no account.</p>
+            <div class="hero-dots" aria-hidden="true">· · · · · · · · · · · · · · · · · · · · · · · ·</div>
           </div>
         </div>
       </div>
