@@ -35,8 +35,10 @@
   --ease: cubic-bezier(.16, 1, .3, 1);         /* ease-out-expo, for reveals */
   --ease-snap: cubic-bezier(.34, 1.56, .64, 1); /* slight overshoot, micro */
 
-  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Matched to the app (LOC-69): Geist for display + body, JetBrains Mono for utility labels. */
+  --font-display: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-body: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -165,8 +167,8 @@ main { position: relative; z-index: 2; }
 .section-sub { margin-top: 18px; color: var(--text-muted); font-size: 1.12rem; max-width: 48ch; }
 .section-head.center .section-sub { margin-left: auto; margin-right: auto; }
 .eyebrow {
-  display: inline-block; font-family: var(--font-body);
-  font-size: .78rem; font-weight: 650; letter-spacing: .14em; text-transform: uppercase;
+  display: inline-block; font-family: var(--font-mono);
+  font-size: .74rem; font-weight: 600; letter-spacing: .10em; text-transform: uppercase;
   color: var(--accent); margin-bottom: 16px;
 }
 
