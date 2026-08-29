@@ -515,8 +515,8 @@
     })();
   </script>
 
-  <!-- Hero centerpiece: self-contained WebGL "data cube" — a chrome block of 4x4 cubies with a
-       glowing lime grid (raymarched rounded-box SDF, studio-lit, filmic-tonemapped). Represents
+  <!-- Hero centerpiece: self-contained WebGL "data cube" — a stack of individual beveled cubies with
+       glowing lime energy along every bevel (raymarched rounded-box SDF, studio-lit, filmic-tonemapped). Represents
        your data held in private, encrypted blocks, breathing in time with the mesh. Falls back to
        the CSS .orb if WebGL is unavailable; single still frame under reduced motion. -->
   <script>
@@ -533,79 +533,70 @@
   mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
   float sdBox(vec3 p, vec3 b, float r){ vec3 q=abs(p)-b; return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0)-r; }
 
-  // a floating data cube — a rounded block, tumbling slowly (top-corner 3/4 view)
+  const float CELL=0.34, GAP=0.045, RAD=0.045, LIM=1.5;   // 4x4x4 grid of individual cubies
+
+  // a stack of individual rounded cubies with gaps between them (premium beveled blocks)
   float map(vec3 p){
-    float t=u_time*0.22;
+    float t=u_time*0.20;
     vec3 q=p; q.yz*=rot(-0.52); q.xz*=rot(t+0.72);
-    return sdBox(q, vec3(0.54), 0.045);
+    vec3 cid = clamp(floor(q/CELL + 0.5), -LIM, LIM);
+    vec3 lp = q - cid*CELL;
+    float shell = sdBox(q, vec3(LIM*CELL + CELL*0.5), 0.05);  // bound the march (no overshoot)
+    float cubie = sdBox(lp, vec3(CELL*0.5 - GAP), RAD);
+    return max(cubie, shell) * 0.7;
   }
-  vec3 nrm(vec3 p){vec2 e=vec2(0.0011,0.);
+  vec3 nrm(vec3 p){vec2 e=vec2(0.002,0.);
     return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}
 
-  // high-contrast studio chrome environment (deep darks, crisp bright softboxes)
   vec3 env(vec3 rd){
     float y=rd.y;
-    vec3 c = mix(vec3(0.02,0.025,0.035), vec3(0.72,0.77,0.86), smoothstep(-0.6,0.7,y));
-    c *= 1.0 - 0.80*smoothstep(0.13,0.0,abs(y+0.03));         // deep dark equator
-    c += vec3(0.26,0.29,0.34)*smoothstep(-0.15,-0.7,y);       // floor bounce
-    c += vec3(1.15)          * smoothstep(0.030,0.0,abs(y-0.55)) * 1.25;  // top softbox
-    c += vec3(0.95,0.99,1.10)* smoothstep(0.018,0.0,abs(y-0.24)) * 0.55;  // fill strip
-    vec3 keyD =normalize(vec3(-0.42,0.82,0.40));
-    c += vec3(1.2) * pow(max(dot(rd,keyD),0.0), 60.0) * 1.9;  // sharp key hotspot
+    vec3 c = mix(vec3(0.03,0.035,0.05), vec3(0.55,0.60,0.70), smoothstep(-0.6,0.7,y));
+    c += vec3(1.0)*smoothstep(0.03,0.0,abs(y-0.55))*0.9;
+    vec3 keyD=normalize(vec3(-0.42,0.82,0.40));
+    c += vec3(1.2)*pow(max(dot(rd,keyD),0.0),50.0)*1.6;
     return c;
   }
   vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0); }
 
   void main(){
     vec3 acc=vec3(0.); float cov=0.; float t=u_time;
-    float pulse = 0.5+0.5*sin(t*1.5);          // breathing energy (matches the mesh heartbeat)
+    float pulse=0.5+0.5*sin(t*1.5);            // breathing energy (matches the mesh heartbeat)
     for(int sx=0;sx<2;sx++){for(int sy=0;sy<2;sy++){
       vec2 o=vec2(float(sx),float(sy))*0.5-0.25;
       vec2 uv=(gl_FragCoord.xy+o-0.5*u_res)/u_res.y;
       vec3 ro=vec3(0.,0.,4.4); vec3 rd=normalize(vec3(uv,-2.3));
-      float tt=0.,d; bool hit=false;
-      for(int i=0;i<128;i++){vec3 pp=ro+rd*tt;d=map(pp);if(d<0.0005){hit=true;break;}tt+=d;if(tt>7.0)break;}
+      float tr=0.,d; bool hit=false;
+      for(int i=0;i<170;i++){vec3 pp=ro+rd*tr;d=map(pp);if(d<0.0004){hit=true;break;}tr+=d;if(tr>7.0)break;}
       if(hit){
-        vec3 p=ro+rd*tt; vec3 n=nrm(p); vec3 v=-rd; vec3 r=reflect(rd,n);
+        vec3 p=ro+rd*tr; vec3 n=nrm(p); vec3 v=-rd; vec3 r=reflect(rd,n);
         float ndv=max(dot(n,v),0.0);
         float fres=pow(1.0-ndv,3.0);
-        vec3 refl = mix(env(r), env(normalize(r+n*0.04)), 0.06);
+        float tt=u_time*0.20;
+        // DARK glossy metal cubie, form-shaded so each block has dimensional depth
         vec3 keyDir=normalize(vec3(-0.40,0.78,0.50));
-        float form = 0.5 + 0.5*dot(n, keyDir);
-        // flat faces each reflect ONE env direction, so any reflection blows a whole face white.
-        // Drive the body almost entirely by dark form-shading (a charcoal monolith) with only a
-        // faint reflective sheen → the glowing lime grid is the star, like the reference.
-        vec3 chrome = vec3(0.045,0.052,0.078) * (0.34 + 1.5*form) + refl*0.035;
-        // object-space point + normal (same transform as map)
-        float tt2=u_time*0.22;
-        vec3 q=p;  q.yz*=rot(-0.52); q.xz*=rot(tt2+0.72);
-        vec3 nb=n; nb.yz*=rot(-0.52); nb.xz*=rot(tt2+0.72);
-        // ---- 4x4 grid seams glowing lime — blocks of encrypted data ----
-        vec3 lime  = vec3(0.70,0.93,0.22);
-        vec3 limeE = vec3(0.42,0.88,0.08);
-        float N=4.0, cell=2.0*0.54/N;
-        vec3 fd = abs(fract(q/cell)-0.5);
-        vec3 gb = smoothstep(0.465,0.5, fd);                   // thinner seams → cube reads as solid blocks
-        float seam = clamp(max(gb.x*(1.0-abs(nb.x)), max(gb.y*(1.0-abs(nb.y)), gb.z*(1.0-abs(nb.z)))), 0.0, 1.0);
-        float heart = pow(ndv, 2.4)*(0.30+0.70*pulse);
-        vec3 col = chrome;
-        col = mix(col, col*0.15, seam*0.85);                   // subtle dark groove between cubies
-        col += limeE * seam * (0.55+0.45*pulse) * 1.15;        // lime edge-glow (thinner, less blinding)
-        col += lime * heart * 0.08;                            // soft glowing core
-        col = mix(col, lime*1.3, pow(fres,2.2)*0.35*(0.5+0.5*pulse)); // lime rim
+        float form=0.5+0.5*dot(n,keyDir);
+        vec3 body = vec3(0.04,0.048,0.072)*(0.40+1.4*form) + env(r)*0.06;
+        // detect the rounded BEVELS via object-space normal (independent of view angle) → only the
+        // edges between cubies glow lime; the faces stay dark. This is the premium block look.
+        vec3 nb=n; nb.yz*=rot(-0.52); nb.xz*=rot(tt+0.72);
+        float axisAlign=max(abs(nb.x),max(abs(nb.y),abs(nb.z)));
+        float edge=smoothstep(0.985,0.87,axisAlign);
+        edge *= smoothstep(0.02,0.20,ndv);                  // fade glow at the grazing silhouette (kills speckle)
+        vec3 lime=vec3(0.74,0.96,0.24), limeE=vec3(0.46,0.92,0.10);
+        vec3 col = body;
+        col += limeE * edge * (1.2+0.7*pulse);              // glowing lime energy along every bevel
+        col = mix(col, lime, clamp(edge*0.6,0.0,0.9));      // the very edge reads solid lime
         vec3 L=normalize(vec3(-0.40,0.78,0.55));
-        col += vec3(1.0)*pow(max(dot(r,L),0.0),120.0)*1.4;     // sharp face specular
-        col += fres*vec3(0.80,0.88,1.0)*0.16;                  // cool contour rim
+        col += vec3(1.0)*pow(max(dot(r,L),0.0),90.0)*1.5;   // glossy sheen (premium wet look)
+        col += fres*vec3(0.70,0.85,1.0)*0.06;               // faint cool rim on the whole cube
         acc+=col; cov+=1.0;
       }
     }}
     float a=cov*0.25;
     vec3 outc=(cov>0.0)?acc/cov:vec3(0.);
-    outc *= 0.96;
-    float Lu=dot(outc, vec3(0.299,0.587,0.114));
-    outc = mix(vec3(Lu), outc, 1.22);                          // saturation recovery
-    outc = aces(outc);
-    outc = pow(outc, vec3(0.4545));
+    float Lu=dot(outc,vec3(0.299,0.587,0.114));
+    outc=mix(vec3(Lu),outc,1.15);
+    outc=aces(outc); outc=pow(outc,vec3(0.4545));
     gl_FragColor=vec4(outc*a, a);
   }`;
     function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
