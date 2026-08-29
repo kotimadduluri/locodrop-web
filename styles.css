@@ -140,23 +140,30 @@ img, svg { display: block; }
 .btn-ghost { background: transparent; color: var(--text); border-color: var(--line-strong); }
 .btn-ghost:hover { border-color: var(--text); background: color-mix(in srgb, var(--text) 5%, transparent); }
 
-/* ---------- Header ---------- */
-.site-header {
-  position: sticky; top: 0; z-index: 50;
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
+/* ---------- Header (floating pill nav) ---------- */
+.site-header { position: sticky; top: 14px; z-index: 50; }
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 11px 12px 11px 20px;
+  background: color-mix(in srgb, var(--surface-1) 80%, transparent);
   backdrop-filter: saturate(180%) blur(16px);
   -webkit-backdrop-filter: saturate(180%) blur(16px);
-  border-bottom: 1px solid transparent;
-  transition: border-color .25s var(--ease), background-color .25s var(--ease);
+  border: 1px solid var(--line); border-radius: 20px;
+  box-shadow: 0 12px 30px -26px rgba(20, 40, 90, .32);
+  transition: box-shadow .25s var(--ease), background-color .25s var(--ease);
 }
-.site-header.scrolled { border-bottom-color: var(--line); }
-.header-inner { display: flex; align-items: center; justify-content: space-between; height: 68px; }
-.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 640; font-family: var(--font-display); letter-spacing: -0.03em; font-size: 1.14rem; }
+.site-header.scrolled .header-inner {
+  background: color-mix(in srgb, var(--surface-1) 92%, transparent);
+  box-shadow: 0 16px 38px -22px rgba(20, 40, 90, .48);
+}
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; font-family: var(--font-display); letter-spacing: -0.03em; font-size: 1.14rem; }
 .brand-mark { display: inline-flex; color: var(--accent); }
-.header-nav { display: flex; align-items: center; gap: 28px; }
-.header-nav > a:not(.btn) { color: var(--text-muted); font-size: .95rem; font-weight: 500; transition: color .16s var(--ease); }
-.header-nav > a:not(.btn):hover { color: var(--text); }
-@media (max-width: 720px) { .header-nav > a:not(.btn) { display: none; } }
+.header-nav { display: flex; align-items: center; gap: 12px; }
+.nav-pill { display: flex; align-items: center; gap: 2px; background: var(--bg-deep); border-radius: 14px; padding: 5px; }
+.nav-pill a { color: var(--text-muted); font-size: .92rem; font-weight: 600; padding: 8px 15px; border-radius: 10px; transition: color .16s var(--ease), background-color .16s var(--ease); }
+.nav-pill a:hover { color: var(--text); background: var(--surface-1); }
+.nav-cta .cta-ar { font-size: 1.05em; line-height: 0; }
+@media (max-width: 760px) { .nav-pill { display: none; } }
 
 /* ---------- Layout shells ---------- */
 main { position: relative; z-index: 2; }
@@ -551,10 +558,17 @@ main { position: relative; z-index: 2; }
   position: relative; z-index: 1; text-align: center; padding: 56px 40px 0;
   font-family: var(--font-display); font-weight: 900;
   font-size: clamp(56px, 12.4vw, 168px); line-height: .84; letter-spacing: -.05em;
-  background: linear-gradient(180deg, var(--text) 0%, var(--text) 58%, var(--text-faint) 100%);
+  /* animated sheen sweep — the app name's transition effect */
+  background: linear-gradient(100deg,
+    var(--text) 0%, var(--text) 40%,
+    var(--accent) 49%, #7ba3ff 51%,
+    var(--text) 60%, var(--text) 100%);
+  background-size: 240% 100%; background-position: 170% 0;
   -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: wordSheen 5.5s cubic-bezier(.5, 0, .2, 1) infinite;
 }
 .hero-word .dot { color: var(--accent); -webkit-text-fill-color: var(--accent); }
+@keyframes wordSheen { 0% { background-position: 170% 0; } 60%, 100% { background-position: -30% 0; } }
 
 /* stage sits ABOVE the wordmark — the object overlaps the letters, like the reference */
 .hero-stage { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none; }
@@ -624,7 +638,11 @@ main { position: relative; z-index: 2; }
   50%     { border-radius: 46% 54% 43% 57%/55% 46% 54% 45%; }
 }
 .hero.anim-paused .orb, .hero.anim-paused .rings, .hero.anim-paused #orbGL { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) { .orb, .rings, #orbGL { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .orb, .rings .spin, .rings .spin2, #orbGL { animation: none; }
+  .hero-word { animation: none; background: linear-gradient(180deg, var(--text), var(--text-faint));
+    -webkit-background-clip: text; background-clip: text; }
+}
 
 @media (max-width: 900px) {
   .hero-midlist, .hero-how { display: none; }
