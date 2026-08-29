@@ -17,6 +17,7 @@
   --bg-deep: #f2f3f7;                 /* recessed panels */
   --surface-1: #ffffff;               /* cards, header */
   --surface-1-rgb: 255, 255, 255;     /* header glass (translucent nav on scroll) */
+  --cube-shadow: rgba(16, 26, 52, 0.42);  /* ground contact shadow under the hero cube */
   --surface-2: #f4f5f8;               /* device body, chips */
   --surface-3: #e9ebf0;               /* device screens */
   --line: #e7e9ef;
@@ -70,6 +71,7 @@
     --bg-deep: #0b0d12;
     --surface-1: #101319;
     --surface-1-rgb: 16, 19, 25;
+    --cube-shadow: rgba(0, 0, 0, 0.55);
     --surface-2: #161a22;
     --surface-3: #1e232d;
     --line: #23272f;
@@ -101,6 +103,7 @@
   --bg-deep: #0b0d12;
   --surface-1: #101319;
   --surface-1-rgb: 16, 19, 25;
+  --cube-shadow: rgba(0, 0, 0, 0.55);
   --surface-2: #161a22;
   --surface-3: #1e232d;
   --line: #23272f;
@@ -796,10 +799,14 @@ main { position: relative; z-index: 2; }
   background: radial-gradient(circle at 50% 48%, rgba(var(--accent-glow), .16), transparent 62%);
   filter: blur(22px);
 }
+/* ground contact shadow — a soft pool beneath the cube. It BREATHES in sync with the float
+   (heroFloat, 6.5s): as the cube dips toward the ground the shadow grows + darkens, as it rises
+   it shrinks + fades. That parallax between object and shadow is what reads as real 3D depth. */
 .orbwrap::after {
-  content: ""; position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%);
-  width: 56%; height: 7%; border-radius: 50%; filter: blur(7px);
-  background: radial-gradient(closest-side, rgba(20,40,90,.26), transparent 72%);
+  content: ""; position: absolute; left: 50%; bottom: 5%; transform: translateX(-50%);
+  width: 62%; height: 9%; border-radius: 50%; filter: blur(11px); z-index: 1;
+  background: radial-gradient(closest-side, var(--cube-shadow), transparent 76%);
+  animation: heroShadow 6.5s ease-in-out infinite;
 }
 /* CSS fallback orb (shown only if WebGL fails) — chrome body with lime liquid, like the reference */
 .orb {
@@ -885,14 +892,19 @@ main { position: relative; z-index: 2; }
 .hero-dots { font-family: var(--font-mono); color: var(--line-strong); font-size: 12px; letter-spacing: .16em; }
 
 @keyframes heroFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+/* cube lowest at 0/100% → shadow biggest+darkest; cube highest at 50% → shadow smallest+lightest */
+@keyframes heroShadow {
+  0%,100% { transform: translateX(-50%) scale(1);   opacity: 1;   }
+  50%     { transform: translateX(-50%) scale(.8);  opacity: .55; }
+}
 @keyframes heroSpin { to { transform: rotate(360deg); } }
 @keyframes heroMorph {
   0%,100% { border-radius: 58% 42% 55% 45%/52% 48% 52% 48%; }
   50%     { border-radius: 46% 54% 43% 57%/55% 46% 54% 45%; }
 }
-.hero.anim-paused .orb, .hero.anim-paused .rings, .hero.anim-paused #orbGL { animation-play-state: paused; }
+.hero.anim-paused .orb, .hero.anim-paused .rings, .hero.anim-paused #orbGL, .hero.anim-paused .orbwrap::after { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .orb, .rings, .rings .spinU, #orbGL { animation: none; }
+  .orb, .rings, .rings .spinU, #orbGL, .orbwrap::after { animation: none; }
   .hero-word { animation: none; background: linear-gradient(180deg, var(--text), var(--text-faint));
     -webkit-background-clip: text; background-clip: text; }
   /* no travelling wordmark: show a static header brand instead (JS hides the flip, shows the ghost) */
