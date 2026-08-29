@@ -515,8 +515,8 @@
     })();
   </script>
 
-  <!-- Hero centerpiece: self-contained WebGL "data cube" — a stack of individual beveled cubies with
-       glowing lime energy along every bevel (raymarched rounded-box SDF, studio-lit, filmic-tonemapped). Represents
+  <!-- Hero centerpiece: self-contained WebGL "data cube" — a stack of glossy lime resin cubies with a
+       vertical color-grade (bright lime top -> deep dark bottom) and dark seams (raymarched rounded-box SDF, studio-lit, filmic-tonemapped). Represents
        your data held in private, encrypted blocks, breathing in time with the mesh. Falls back to
        the CSS .orb if WebGL is unavailable; single still frame under reduced motion. -->
   <script>
@@ -548,54 +548,52 @@
   vec3 nrm(vec3 p){vec2 e=vec2(0.002,0.);
     return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}
 
+  // Brand-lime scene (the reference's technique, our palette): near-black cool ambient below,
+  // bright LIME key up top. The glossy cubies pick this up as a lime->deep-green->black gradient.
   vec3 env(vec3 rd){
     float y=rd.y;
-    vec3 c = mix(vec3(0.03,0.035,0.05), vec3(0.55,0.60,0.70), smoothstep(-0.6,0.7,y));
-    c += vec3(1.0)*smoothstep(0.03,0.0,abs(y-0.55))*0.9;
-    vec3 keyD=normalize(vec3(-0.42,0.82,0.40));
-    c += vec3(1.2)*pow(max(dot(rd,keyD),0.0),50.0)*1.6;
+    vec3 lo = vec3(0.020,0.028,0.022);                    // near-black cool floor
+    vec3 mid= vec3(0.09,0.14,0.06);                       // deep green
+    vec3 hi = vec3(0.52,0.74,0.22);                       // bright lime top
+    vec3 c = mix(lo, mid, smoothstep(-0.6,0.12,y));
+    c = mix(c, hi, smoothstep(0.12,0.95,y));
+    c += vec3(0.62,0.86,0.30)*pow(max(y,0.0),3.0)*0.8;    // lime key patch overhead
     return c;
   }
   vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0); }
 
   void main(){
-    vec3 acc=vec3(0.); float cov=0.; float t=u_time;
-    float pulse=0.5+0.5*sin(t*1.5);            // breathing energy (matches the mesh heartbeat)
+    vec3 acc=vec3(0.); float cov=0.;
     for(int sx=0;sx<2;sx++){for(int sy=0;sy<2;sy++){
       vec2 o=vec2(float(sx),float(sy))*0.5-0.25;
       vec2 uv=(gl_FragCoord.xy+o-0.5*u_res)/u_res.y;
-      vec3 ro=vec3(0.,0.,4.4); vec3 rd=normalize(vec3(uv,-2.3));
+      vec3 ro=vec3(0.,0.,4.4); vec3 rd=normalize(vec3(uv,-2.35));
       float tr=0.,d; bool hit=false;
       for(int i=0;i<170;i++){vec3 pp=ro+rd*tr;d=map(pp);if(d<0.0004){hit=true;break;}tr+=d;if(tr>7.0)break;}
       if(hit){
         vec3 p=ro+rd*tr; vec3 n=nrm(p); vec3 v=-rd; vec3 r=reflect(rd,n);
         float ndv=max(dot(n,v),0.0);
-        float fres=pow(1.0-ndv,3.0);
-        float tt=u_time*0.20;
-        // DARK glossy metal cubie, form-shaded so each block has dimensional depth
-        vec3 keyDir=normalize(vec3(-0.40,0.78,0.50));
-        float form=0.5+0.5*dot(n,keyDir);
-        vec3 body = vec3(0.04,0.048,0.072)*(0.40+1.4*form) + env(r)*0.06;
-        // detect the rounded BEVELS via object-space normal (independent of view angle) → only the
-        // edges between cubies glow lime; the faces stay dark. This is the premium block look.
-        vec3 nb=n; nb.yz*=rot(-0.52); nb.xz*=rot(tt+0.72);
-        float axisAlign=max(abs(nb.x),max(abs(nb.y),abs(nb.z)));
-        float edge=smoothstep(0.985,0.87,axisAlign);
-        edge *= smoothstep(0.02,0.20,ndv);                  // fade glow at the grazing silhouette (kills speckle)
-        vec3 lime=vec3(0.74,0.96,0.24), limeE=vec3(0.46,0.92,0.10);
-        vec3 col = body;
-        col += limeE * edge * (1.2+0.7*pulse);              // glowing lime energy along every bevel
-        col = mix(col, lime, clamp(edge*0.6,0.0,0.9));      // the very edge reads solid lime
-        vec3 L=normalize(vec3(-0.40,0.78,0.55));
-        col += vec3(1.0)*pow(max(dot(r,L),0.0),90.0)*1.5;   // glossy sheen (premium wet look)
-        col += fres*vec3(0.70,0.85,1.0)*0.06;               // faint cool rim on the whole cube
+        float fres=pow(1.0-ndv,3.5);
+        // glossy resin: the ENVIRONMENT REFLECTION carries the color (top faces reflect the bright
+        // lime key, side faces reflect the darker ambient) — the reference's blend, no glowing edges
+        vec3 keyDir=normalize(vec3(-0.30,0.92,0.35));
+        float diff=max(dot(n,keyDir),0.0);
+        vec3 refl=env(r);
+        vec3 base=vec3(0.022,0.028,0.016);                 // near-black green resin
+        vec3 col=base;
+        col += refl * 0.66;                                // reflection-dominant → top bright, sides dark
+        col += vec3(0.55,0.80,0.24)*diff*0.22;             // gentle lime key diffuse
+        col += fres*vec3(0.45,0.62,0.20)*0.09;             // very subtle lime sheen
+        col += vec3(0.95,1.0,0.85)*pow(max(dot(r,keyDir),0.0),100.0)*0.55; // sharp gloss highlight
+        // DRAMATIC vertical grade: bright lime top -> deep near-black bottom (dark seams stay dark)
+        float vfall=smoothstep(-0.70,0.60,p.y);
+        col *= (0.07 + 1.0*vfall*vfall);
         acc+=col; cov+=1.0;
       }
     }}
     float a=cov*0.25;
     vec3 outc=(cov>0.0)?acc/cov:vec3(0.);
-    float Lu=dot(outc,vec3(0.299,0.587,0.114));
-    outc=mix(vec3(Lu),outc,1.15);
+    outc=mix(vec3(dot(outc,vec3(0.299,0.587,0.114))),outc,1.28);  // saturation
     outc=aces(outc); outc=pow(outc,vec3(0.4545));
     gl_FragColor=vec4(outc*a, a);
   }`;
