@@ -683,7 +683,7 @@ main { position: relative; z-index: 2; }
 
 /* stage sits ABOVE the wordmark — the object overlaps the letters, like the reference */
 .hero-stage { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none; }
-.orbwrap { position: relative; width: min(50vw, 540px); height: min(50vw, 540px); margin-top: 40px; }
+.orbwrap { position: relative; width: min(50vw, 540px); height: min(50vw, 540px); margin-top: 40px; perspective: 1200px; }
 /* atmospheric depth — a soft lime glow pooled behind the object (server-room energy) */
 .orbwrap::before {
   content: ""; position: absolute; inset: -22%; z-index: 0; pointer-events: none; border-radius: 50%;
@@ -710,40 +710,40 @@ main { position: relative; z-index: 2; }
   transition: opacity .6s ease; animation: heroFloat 6.5s ease-in-out infinite;
 }
 #orbGL.on { opacity: 1; }
-.rings { position: absolute; inset: -4%; overflow: visible; }
+/* whole orbital system gently precesses in 3D (tilts toward/away) → realistic, not a flat pinwheel */
+.rings { position: absolute; inset: -4%; overflow: visible; transform-style: preserve-3d;
+  transform-origin: 50% 50%; animation: orbitPrecess 22s ease-in-out infinite; }
 .rings.back { z-index: 1; }
 .rings.front { z-index: 3; }
+@keyframes orbitPrecess {
+  0%   { transform: rotateX(15deg)  rotateY(-18deg); }
+  50%  { transform: rotateX(-11deg) rotateY(18deg); }
+  100% { transform: rotateX(15deg)  rotateY(-18deg); }
+}
 .rings svg { width: 100%; height: 100%; overflow: visible; }
 .rings ellipse { fill: none; }
 /* the 3 orbits spin as ONE rigid unit → stays a balanced, same-size atom (no drifting) */
 .rings .spinU { transform-box: view-box; transform-origin: 50% 50%; animation: heroSpin 60s linear infinite; }
 /* layered neon orbits: near arcs glow in front, far arcs dim + are occluded by the cube */
 .rings path { fill: none; stroke: var(--accent); stroke-linecap: round; }
-.rings .r-near  { stroke-width: 2.0; opacity: 1;
-  filter: drop-shadow(0 0 2px rgba(var(--accent-glow), 1))
-          drop-shadow(0 0 7px rgba(var(--accent-glow), .85))
-          drop-shadow(0 0 18px rgba(var(--accent-glow), .55))
-          drop-shadow(0 0 34px rgba(var(--accent-glow), .3)); }
-.rings .r-near2 { stroke-width: 1.5; opacity: .88;
-  filter: drop-shadow(0 0 2px rgba(var(--accent-glow), .95))
+/* all three orbits are IDENTICAL ovals (same width, opacity, glow) so none reads bigger */
+.rings .r-near { stroke-width: 2.0; opacity: 1;
+  filter: drop-shadow(0 0 3px rgba(var(--accent-glow), 1))
+          drop-shadow(0 0 9px rgba(var(--accent-glow), .9))
+          drop-shadow(0 0 22px rgba(var(--accent-glow), .6))
+          drop-shadow(0 0 44px rgba(var(--accent-glow), .38)); }
+.rings .r-far { stroke-width: 2.0; opacity: .8;   /* same line size as the front arc; only slightly dimmer for depth */
+  filter: drop-shadow(0 0 3px rgba(var(--accent-glow), .85))
           drop-shadow(0 0 9px rgba(var(--accent-glow), .6))
-          drop-shadow(0 0 22px rgba(var(--accent-glow), .38))
-          drop-shadow(0 0 40px rgba(var(--accent-glow), .22)); }
-.rings .r-near3 { stroke-width: 1.2; opacity: .68;
-  filter: drop-shadow(0 0 3px rgba(var(--accent-glow), .8))
-          drop-shadow(0 0 14px rgba(var(--accent-glow), .45))
-          drop-shadow(0 0 30px rgba(var(--accent-glow), .25)); }
-.rings .r-far  { stroke-width: 1.4; opacity: .46; filter: drop-shadow(0 0 6px rgba(var(--accent-glow), .55)); }
-.rings .r-far2 { stroke-width: 1.1; opacity: .36; filter: drop-shadow(0 0 6px rgba(var(--accent-glow), .45)); }
-.rings .r-far3 { stroke-width: 1.0; opacity: .30; filter: drop-shadow(0 0 6px rgba(var(--accent-glow), .4)); }
+          drop-shadow(0 0 22px rgba(var(--accent-glow), .4)); }
 /* a bright comet of light sweeps the front of each orbit — reads as motion circulating the cube */
-.rings .pulse { fill: none; stroke: #f2ffce; stroke-linecap: round; stroke-width: 3.0;
-  stroke-dasharray: 18 420; filter: drop-shadow(0 0 5px rgba(var(--accent-glow), 1))
-          drop-shadow(0 0 13px rgba(var(--accent-glow), .85))
-          drop-shadow(0 0 26px rgba(var(--accent-glow), .5)); animation: orbitFlow 3.6s linear infinite; }
-.rings .pulseB { stroke-width: 2.4; animation-duration: 4.8s; }
-.rings .pulseC { stroke-width: 2.0; animation-duration: 3.0s; }
-@keyframes orbitFlow { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -438; } }
+.rings .pulse { fill: none; stroke: #f4ffd6; stroke-linecap: round; stroke-width: 3.0;
+  stroke-dasharray: 20 460; filter: drop-shadow(0 0 6px rgba(var(--accent-glow), 1))
+          drop-shadow(0 0 16px rgba(var(--accent-glow), .9))
+          drop-shadow(0 0 32px rgba(var(--accent-glow), .55)); animation: orbitFlow 3.6s linear infinite; }
+.rings .pulseB { animation-duration: 4.8s; }
+.rings .pulseC { animation-duration: 3.0s; }
+@keyframes orbitFlow { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -480; } }
 
 .hero-midlist {
   position: absolute; right: 30px; top: 56%; z-index: 4; list-style: none; margin: 0; padding: 0;
@@ -781,7 +781,7 @@ main { position: relative; z-index: 2; }
 }
 .hero.anim-paused .orb, .hero.anim-paused .rings, .hero.anim-paused #orbGL { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) {
-  .orb, .rings .spin, #orbGL { animation: none; }
+  .orb, .rings, .rings .spinU, #orbGL { animation: none; }
   .hero-word { animation: none; background: linear-gradient(180deg, var(--text), var(--text-faint));
     -webkit-background-clip: text; background-clip: text; }
   /* no travelling wordmark: show a static header brand instead (JS hides the flip, shows the ghost) */
