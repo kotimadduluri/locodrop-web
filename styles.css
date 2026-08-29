@@ -693,9 +693,9 @@ main { position: relative; z-index: 2; }
 .orb {
   position: absolute; inset: 12%; border-radius: 56% 44% 55% 45%/52% 50% 50% 48%;
   background:
-    radial-gradient(44% 38% at 46% 26%, #ffffff 0%, rgba(232,236,244,.5) 40%, rgba(200,205,215,0) 66%),
-    radial-gradient(58% 54% at 62% 56%, #d4f34e 0%, rgba(198,240,77,.55) 32%, rgba(150,160,170,0) 62%),
-    radial-gradient(120% 120% at 60% 76%, #6b7280 0%, #9aa1ad 40%, #c3c8d2 78%, #e6e9ee 100%);
+    radial-gradient(46% 40% at 44% 22%, #ffffff 0%, rgba(232,236,244,.5) 42%, rgba(200,205,215,0) 68%),
+    radial-gradient(70% 56% at 50% 82%, #d4f34e 0%, rgba(198,240,77,.65) 34%, rgba(150,170,120,0) 64%),
+    radial-gradient(120% 120% at 55% 40%, #8b93a1 0%, #aab0bd 38%, #c8ccd5 72%, #e6e9ee 100%);
   box-shadow: inset -16px -20px 44px rgba(40,50,60,.5), inset 12px 14px 38px rgba(255,255,255,.6);
   animation: heroMorph 9s ease-in-out infinite, heroFloat 6.5s ease-in-out infinite;
 }

@@ -515,8 +515,10 @@
     })();
   </script>
 
-  <!-- Hero centerpiece: self-contained WebGL chrome-and-Trust-Blue object (raymarched SDF).
-       Falls back to the CSS .orb if WebGL is unavailable; single still frame under reduced motion. -->
+  <!-- Hero centerpiece: self-contained WebGL "private core" — a polished chrome sphere holding a
+       molten-lime energy core (raymarched SDF, studio-lit, filmic-tonemapped). Represents your
+       encrypted data held privately + locally, breathing in time with the mesh. Falls back to the
+       CSS .orb if WebGL is unavailable; single still frame under reduced motion. -->
   <script>
   (function(){
     var cv=document.getElementById('orbGL'); if(!cv) return;
@@ -525,37 +527,84 @@
     if(!gl) return; // CSS fallback orb stays visible
     var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-    var fs=[
-     'precision highp float;uniform vec2 u_res;uniform float u_time;',
-     'mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}',
-     'float smin(float a,float b,float k){float h=clamp(0.5+0.5*(b-a)/k,0.,1.);return mix(b,a,h)-k*h*(1.-h);}',
-     'float map(vec3 p){float t=u_time*0.35;vec3 q=p;q.xz*=rot(t);q.yz*=rot(t*0.6);',
-     ' float d=length(q)-0.86;',
-     ' float fold=sin(q.x*4.3+t*1.2)*cos(q.y*4.1-t*0.9)+0.55*sin(q.y*7.0+q.z*5.5+t*1.6)+0.35*sin(q.z*6.2-q.x*4.0-t);',
-     ' d+=0.055*fold;',
-     ' d=smin(d,length(q-vec3(0.42*sin(t*0.8),0.34,0.26*cos(t)))-0.34,0.42);',
-     ' d=smin(d,length(q-vec3(-0.4,-0.36*sin(t*1.1),-0.24))-0.3,0.42);return d*0.8;}',
-     'vec3 nrm(vec3 p){vec2 e=vec2(0.0012,0.);return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}',
-     'vec3 env(vec3 rd){float y=rd.y;vec3 c=mix(vec3(0.12),vec3(0.97),smoothstep(-0.7,0.92,y));',
-     ' c+=vec3(1.0)*smoothstep(0.05,0.0,abs(y-0.42))*0.9;c+=vec3(0.82,0.88,1.0)*smoothstep(0.06,0.0,abs(y+0.08))*0.55;',
-     ' c+=vec3(1.0)*smoothstep(0.02,0.0,abs(rd.x-0.5))*0.4;c*=vec3(0.9,0.94,1.06);return c;}',
-     'void main(){vec3 acc=vec3(0.);float cov=0.;float t=u_time;',
-     ' for(int sx=0;sx<2;sx++){for(int sy=0;sy<2;sy++){',
-     '  vec2 o=vec2(float(sx),float(sy))*0.5-0.25;',
-     '  vec2 uv=(gl_FragCoord.xy+o-0.5*u_res)/u_res.y;',
-     '  vec3 ro=vec3(0.,0.,4.6);vec3 rd=normalize(vec3(uv,-2.15));',
-     '  float tt=0.;float d;bool hit=false;',
-     '  for(int i=0;i<120;i++){vec3 pp=ro+rd*tt;d=map(pp);if(d<0.0006){hit=true;break;}tt+=d;if(tt>7.0)break;}',
-     '  if(hit){vec3 p=ro+rd*tt;vec3 n=nrm(p);vec3 v=-rd;vec3 r=reflect(rd,n);vec3 chrome=env(r);',
-     '   float fres=pow(1.0-max(dot(n,v),0.0),3.5);',
-     '   float sw=sin(p.x*3.0+p.y*3.4+sin(p.z*3.0+t*0.5)*2.0+t*0.25);float veins=smoothstep(0.58,0.92,sw);',
-     '   float cav=smoothstep(0.12,0.0,map(p+n*0.10)-0.10);vec3 lime=vec3(0.78,0.94,0.30);',
-     '   vec3 base=chrome;base=mix(base,lime*1.05,veins*0.42);base+=cav*lime*0.5;',
-     '   vec3 L=normalize(vec3(0.45,0.9,0.6));base+=vec3(1.0)*pow(max(dot(r,L),0.0),120.0)*1.2;',
-     '   base+=fres*vec3(0.85,0.9,1.0)*0.55;acc+=base;cov+=1.0;}',
-     ' }}',
-     ' float a=cov*0.25;vec3 outc=(cov>0.0)?acc/cov:vec3(0.);gl_FragColor=vec4(outc*a,a);}'
-    ].join('\n');
+    var fs=`
+  precision highp float;
+  uniform vec2 u_res; uniform float u_time;
+  mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
+
+  // SDF: near-perfect polished sphere with only a whisper of liquid flow
+  float map(vec3 p){
+    float t=u_time*0.26;
+    vec3 q=p; q.xz*=rot(t*0.7); q.yz*=rot(t*0.42);
+    float d=length(q)-0.92;
+    float rip = sin(q.x*5.0+t)*sin(q.y*5.0-t*1.1)*sin(q.z*5.0+t*0.6);
+    d += 0.006*rip;
+    return d*0.9;
+  }
+  vec3 nrm(vec3 p){vec2 e=vec2(0.0011,0.);
+    return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}
+
+  // studio environment — high-contrast, the way real polished chrome reflects a photo studio
+  vec3 env(vec3 rd){
+    float y=rd.y;
+    vec3 c = mix(vec3(0.04,0.05,0.07), vec3(0.80,0.85,0.94), smoothstep(-0.55,0.62,y));
+    c *= 1.0 - 0.72*smoothstep(0.11,0.0,abs(y+0.02));
+    c += vec3(0.32,0.35,0.40)*smoothstep(-0.12,-0.62,y);
+    c += vec3(1.05)          * smoothstep(0.026,0.0,abs(y-0.52)) * 0.92;
+    c += vec3(0.92,0.96,1.06)* smoothstep(0.020,0.0,abs(y-0.20)) * 0.48;
+    vec3 keyD =normalize(vec3(-0.45,0.80,0.40));
+    vec3 fillD=normalize(vec3(0.78,0.10,0.55));
+    c += vec3(1.1)          * pow(max(dot(rd,keyD),0.0), 40.0) * 1.6;
+    c += vec3(0.80,0.86,1.0)* pow(max(dot(rd,fillD),0.0),22.0) * 0.6;
+    return c;
+  }
+  vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0); }
+
+  void main(){
+    vec3 acc=vec3(0.); float cov=0.; float t=u_time;
+    float pulse = 0.5+0.5*sin(t*1.4);          // breathing core (matches the mesh heartbeat)
+    for(int sx=0;sx<2;sx++){for(int sy=0;sy<2;sy++){
+      vec2 o=vec2(float(sx),float(sy))*0.5-0.25;
+      vec2 uv=(gl_FragCoord.xy+o-0.5*u_res)/u_res.y;
+      vec3 ro=vec3(0.,0.,4.4); vec3 rd=normalize(vec3(uv,-2.25));
+      float tt=0.,d; bool hit=false;
+      for(int i=0;i<128;i++){vec3 pp=ro+rd*tt;d=map(pp);if(d<0.0005){hit=true;break;}tt+=d;if(tt>7.0)break;}
+      if(hit){
+        vec3 p=ro+rd*tt; vec3 n=nrm(p); vec3 v=-rd; vec3 r=reflect(rd,n);
+        float fres=pow(1.0-max(dot(n,v),0.0),3.2);
+        vec3 chrome = mix(env(r), env(normalize(r+n*0.06)), 0.14);
+        chrome *= vec3(0.62,0.65,0.72);                        // gunmetal
+        // lime private core: molten-lime energy pooling in the lower body, pulsing
+        vec3 lime  = vec3(0.76,0.96,0.24);
+        vec3 limeE = vec3(0.66,0.92,0.16);
+        vec3 q=p; q.xz*=rot(t*0.5); q.yz*=rot(t*0.28);
+        float wave = 0.16*sin(q.x*3.0 + t) + 0.11*cos(q.z*2.6 - t*1.2);
+        float pool = smoothstep(0.30, -0.5, p.y + wave);
+        float v1 = sin(q.x*3.6 + sin(q.z*3.2+t)*2.2) * cos(q.y*3.0 - t*1.1);
+        float v2 = sin(q.z*6.5 - q.x*4.0 + t*1.9);
+        float veins = smoothstep(0.10,0.85, v1 + 0.5*v2);
+        float energy = pool*(0.42 + 0.58*veins);
+        float rim = pow(fres, 1.3);
+        vec3 col = chrome;
+        col = mix(col, lime * (0.5 + 0.5*chrome), energy*0.88);
+        col += limeE * energy * (0.42 + 0.35*pulse);
+        col = mix(col, lime*1.5, rim*0.45*(0.55+0.45*pulse));
+        vec3 L=normalize(vec3(-0.45,0.80,0.55));
+        col += vec3(1.0)*pow(max(dot(r,L),0.0),160.0)*2.0;
+        col += vec3(0.9,1.0,0.7)*pow(max(dot(r,L),0.0),40.0)*energy*0.6;
+        col += fres*vec3(0.80,0.88,1.0)*0.22;
+        acc+=col; cov+=1.0;
+      }
+    }}
+    float a=cov*0.25;
+    vec3 outc=(cov>0.0)?acc/cov:vec3(0.);
+    outc *= 0.94;
+    float L=dot(outc, vec3(0.299,0.587,0.114));
+    outc = mix(vec3(L), outc, 1.32);
+    outc = aces(outc);
+    outc = pow(outc, vec3(0.4545));
+    gl_FragColor=vec4(outc*a, a);
+  }`;
     function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
       return gl.getShaderParameter(s,gl.COMPILE_STATUS)?s:null;}
     var v=sh(gl.VERTEX_SHADER,vs),f=sh(gl.FRAGMENT_SHADER,fs); if(!v||!f) return;
