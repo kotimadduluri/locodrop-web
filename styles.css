@@ -717,11 +717,13 @@ main { position: relative; z-index: 2; }
 .rings ellipse { fill: none; }
 .rings .spin { animation: heroSpin 34s linear infinite; transform-origin: 50% 50%; }
 .rings .spin2 { animation: heroSpin 26s linear infinite reverse; transform-origin: 50% 50%; }
-/* one bold glowing neon orbital ring (the reference's signature) + faint accent rings */
-.rings .r-b { stroke: var(--accent); stroke-width: 1; opacity: .22; }
-.rings .r-f { stroke: var(--accent); stroke-width: 2.6; opacity: 1;
-  filter: drop-shadow(0 0 3px rgba(var(--accent-glow), .9)) drop-shadow(0 0 10px rgba(var(--accent-glow), .5)); }
-.rings .r-f2 { stroke: var(--accent); stroke-width: 1; opacity: .38; }
+/* one clean, elegant glowing neon orbital ring (reference line style) + a faint companion */
+.rings .r-b { stroke: var(--accent); stroke-width: .9; opacity: .16; }   /* hint passing behind */
+.rings .r-f { stroke: var(--accent); stroke-width: 1.8; opacity: 1; stroke-linecap: round;
+  filter: drop-shadow(0 0 1.5px rgba(var(--accent-glow), 1))
+          drop-shadow(0 0 5px rgba(var(--accent-glow), .65))
+          drop-shadow(0 0 13px rgba(var(--accent-glow), .35)); }
+.rings .r-f2 { stroke: var(--accent); stroke-width: .8; opacity: .20; }
 
 .hero-midlist {
   position: absolute; right: 30px; top: 56%; z-index: 4; list-style: none; margin: 0; padding: 0;

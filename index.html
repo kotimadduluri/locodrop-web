@@ -533,19 +533,20 @@
   mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
   float sdBox(vec3 p, vec3 b, float r){ vec3 q=abs(p)-b; return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0)-r; }
 
-  const float CELL=0.34, GAP=0.045, RAD=0.045, LIM=1.5;   // 4x4x4 grid of individual cubies
+  const float CELL=0.34, GAP=0.045, RAD=0.062, LIM=1.5;   // 4x4x4 grid; rounder bevels = smoother normals
 
   // a stack of individual rounded cubies with gaps between them (premium beveled blocks)
   float map(vec3 p){
     float t=u_time*0.20;
     vec3 q=p; q.yz*=rot(-0.52); q.xz*=rot(t+0.72);
+    q *= 1.30;                                               // shrink the cube in view (~77%) for breathing room
     vec3 cid = clamp(floor(q/CELL + 0.5), -LIM, LIM);
     vec3 lp = q - cid*CELL;
     float shell = sdBox(q, vec3(LIM*CELL + CELL*0.5), 0.05);  // bound the march (no overshoot)
     float cubie = sdBox(lp, vec3(CELL*0.5 - GAP), RAD);
-    return max(cubie, shell) * 0.7;
+    return max(cubie, shell) * 0.7 / 1.30;
   }
-  vec3 nrm(vec3 p){vec2 e=vec2(0.002,0.);
+  vec3 nrm(vec3 p){vec2 e=vec2(0.0038,0.);                 // wider sample = smoother normals (less speckle)
     return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}
 
   // Brand-lime scene (the reference's technique, our palette): near-black cool ambient below,
@@ -557,7 +558,7 @@
     vec3 hi = vec3(0.52,0.74,0.22);                       // bright lime top
     vec3 c = mix(lo, mid, smoothstep(-0.6,0.12,y));
     c = mix(c, hi, smoothstep(0.12,0.95,y));
-    c += vec3(0.62,0.86,0.30)*pow(max(y,0.0),3.0)*0.8;    // lime key patch overhead
+    c += vec3(0.62,0.86,0.30)*pow(max(y,0.0),2.2)*0.6;    // lime key patch (softer = no sparkle)
     return c;
   }
   vec3 aces(vec3 x){ return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14),0.0,1.0); }
@@ -584,9 +585,9 @@
         col += refl * 0.66;                                // reflection-dominant → top bright, sides dark
         col += vec3(0.55,0.80,0.24)*diff*0.22;             // gentle lime key diffuse
         col += fres*vec3(0.45,0.62,0.20)*0.09;             // very subtle lime sheen
-        col += vec3(0.95,1.0,0.85)*pow(max(dot(r,keyDir),0.0),100.0)*0.55; // sharp gloss highlight
+        col += vec3(0.95,1.0,0.85)*pow(max(dot(r,keyDir),0.0),60.0)*0.45; // gloss highlight (softer = no sparkle)
         // DRAMATIC vertical grade: bright lime top -> deep near-black bottom (dark seams stay dark)
-        float vfall=smoothstep(-0.70,0.60,p.y);
+        float vfall=smoothstep(-0.56,0.48,p.y);              // range matched to the smaller cube
         col *= (0.07 + 1.0*vfall*vfall);
         acc+=col; cov+=1.0;
       }
