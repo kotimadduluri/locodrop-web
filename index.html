@@ -515,10 +515,10 @@
     })();
   </script>
 
-  <!-- Hero centerpiece: self-contained WebGL "private core" — a polished chrome sphere holding a
-       molten-lime energy core (raymarched SDF, studio-lit, filmic-tonemapped). Represents your
-       encrypted data held privately + locally, breathing in time with the mesh. Falls back to the
-       CSS .orb if WebGL is unavailable; single still frame under reduced motion. -->
+  <!-- Hero centerpiece: self-contained WebGL "data cube" — a chrome block of 4x4 cubies with a
+       glowing lime grid (raymarched rounded-box SDF, studio-lit, filmic-tonemapped). Represents
+       your data held in private, encrypted blocks, breathing in time with the mesh. Falls back to
+       the CSS .orb if WebGL is unavailable; single still frame under reduced motion. -->
   <script>
   (function(){
     var cv=document.getElementById('orbGL'); if(!cv) return;
@@ -531,13 +531,13 @@
   precision highp float;
   uniform vec2 u_res; uniform float u_time;
   mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
+  float sdBox(vec3 p, vec3 b, float r){ vec3 q=abs(p)-b; return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0)-r; }
 
+  // a floating data cube — a rounded block, tumbling slowly (top-corner 3/4 view)
   float map(vec3 p){
-    float t=u_time*0.24;
-    vec3 q=p; q.xz*=rot(t*0.7); q.yz*=rot(t*0.4);
-    float d=length(q)-0.92;
-    d += 0.005*sin(q.x*5.0+t)*sin(q.y*5.0-t)*sin(q.z*5.0);   // faint shimmer, clean sphere
-    return d*0.9;
+    float t=u_time*0.22;
+    vec3 q=p; q.yz*=rot(-0.52); q.xz*=rot(t+0.72);
+    return sdBox(q, vec3(0.54), 0.045);
   }
   vec3 nrm(vec3 p){vec2 e=vec2(0.0011,0.);
     return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}
@@ -569,30 +569,33 @@
         vec3 p=ro+rd*tt; vec3 n=nrm(p); vec3 v=-rd; vec3 r=reflect(rd,n);
         float ndv=max(dot(n,v),0.0);
         float fres=pow(1.0-ndv,3.0);
-        // premium dark chrome — sharp mirror, deep, glossy (not milky)
-        vec3 chrome = mix(env(r), env(normalize(r+n*0.04)), 0.06);
-        chrome *= vec3(0.66,0.69,0.76);
-        // ---- lime ENERGY: thin glowing light-traces circling the core + a pulsing heart + rim ----
+        vec3 refl = mix(env(r), env(normalize(r+n*0.04)), 0.06);
+        vec3 keyDir=normalize(vec3(-0.40,0.78,0.50));
+        float form = 0.5 + 0.5*dot(n, keyDir);
+        // flat faces each reflect ONE env direction, so any reflection blows a whole face white.
+        // Drive the body almost entirely by dark form-shading (a charcoal monolith) with only a
+        // faint reflective sheen → the glowing lime grid is the star, like the reference.
+        vec3 chrome = vec3(0.045,0.052,0.078) * (0.34 + 1.5*form) + refl*0.035;
+        // object-space point + normal (same transform as map)
+        float tt2=u_time*0.22;
+        vec3 q=p;  q.yz*=rot(-0.52); q.xz*=rot(tt2+0.72);
+        vec3 nb=n; nb.yz*=rot(-0.52); nb.xz*=rot(tt2+0.72);
+        // ---- 4x4 grid seams glowing lime — blocks of encrypted data ----
         vec3 lime  = vec3(0.70,0.93,0.22);
-        vec3 limeE = vec3(0.40,0.86,0.08);                     // green-biased so bright stays lime, not yellow
-        vec3 q=p; q.xz*=rot(t*0.4); q.yz*=rot(t*0.2);
-        float ang = atan(q.z, q.x);
-        float f1 = sin(q.y*3.6 + sin(ang*2.0 + t)*1.6 + t*0.7);
-        float core1 = smoothstep(0.975, 1.0, f1);
-        float glow1 = smoothstep(0.62, 1.0, f1);
-        float f2 = sin(q.y*5.2 - ang*1.5 + t*1.6 + 2.0);
-        float core2 = smoothstep(0.985, 1.0, f2);
-        float glow2 = smoothstep(0.78, 1.0, f2);
-        float traceCore = core1 + core2;
-        float traceGlow = glow1 + 0.6*glow2;
-        float heart = pow(ndv, 2.6) * (0.30+0.70*pulse);       // pulsing lime heart (centre-facing)
+        vec3 limeE = vec3(0.42,0.88,0.08);
+        float N=4.0, cell=2.0*0.54/N;
+        vec3 fd = abs(fract(q/cell)-0.5);
+        vec3 gb = smoothstep(0.43,0.5, fd);
+        float seam = clamp(max(gb.x*(1.0-abs(nb.x)), max(gb.y*(1.0-abs(nb.y)), gb.z*(1.0-abs(nb.z)))), 0.0, 1.0);
+        float heart = pow(ndv, 2.4)*(0.30+0.70*pulse);
         vec3 col = chrome;
-        col += limeE * (traceCore*1.9 + traceGlow*0.28) * (0.6+0.4*pulse); // glowing energy traces
-        col += lime * heart * 0.16;                            // soft glowing core
-        col = mix(col, lime*1.35, pow(fres,2.0)*0.42*(0.5+0.5*pulse)); // lime fresnel rim
-        vec3 L=normalize(vec3(-0.42,0.82,0.55));
-        col += vec3(1.0)*pow(max(dot(r,L),0.0),150.0)*2.2;     // sharp wet-chrome specular
-        col += fres*vec3(0.80,0.88,1.0)*0.20;                  // cool contour rim
+        col = mix(col, col*0.12, seam*0.9);                    // dark groove between cubies
+        col += limeE * seam * (0.55+0.45*pulse) * 1.35;        // lime energy glowing in the grid
+        col += lime * heart * 0.08;                            // soft glowing core
+        col = mix(col, lime*1.3, pow(fres,2.2)*0.35*(0.5+0.5*pulse)); // lime rim
+        vec3 L=normalize(vec3(-0.40,0.78,0.55));
+        col += vec3(1.0)*pow(max(dot(r,L),0.0),120.0)*1.4;     // sharp face specular
+        col += fres*vec3(0.80,0.88,1.0)*0.16;                  // cool contour rim
         acc+=col; cov+=1.0;
       }
     }}
