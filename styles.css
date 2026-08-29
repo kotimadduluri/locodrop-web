@@ -243,14 +243,13 @@ img, svg { display: block; }
   --float: 0;                         /* 0 while the header still overlaps the white hero sheet → 1 once it clears */
   display: flex; align-items: center; gap: 16px;
   padding: 16px clamp(20px, 4%, 72px); width: 100%;   /* side margin = 4% of the card, matches the wordmark */
-  /* The brand's BACKGROUND morphs in lockstep with the wordmark (--dock): flush opaque sheet at the
-     top → frosted, rounded bar as you scroll. Frost + rounded are white-on-white harmless while the
-     header still sits over the hero's own white sheet, so header + hero read as ONE component.
-     The LIFT SHADOW is held back on --float — it only fades in AFTER the hero sheet has scrolled
-     past, so it never casts a dividing band across the continuous surface (the two-section seam). */
-  background: rgba(var(--surface-1-rgb), calc(1 - 0.26 * var(--dock)));
-  -webkit-backdrop-filter: blur(calc(14px * var(--dock)));
-  backdrop-filter: blur(calc(14px * var(--dock)));
+  /* The brand's BACKGROUND morphs in lockstep with the wordmark (--dock): flush sheet at the top →
+     rounded bar as you scroll. Kept OPAQUE (not frosted) so the raised hero cube disappears cleanly
+     behind it on scroll instead of bleeding through a translucent bar. Rounded is white-on-white
+     harmless while over the hero's own sheet, so header + hero read as ONE component. The LIFT
+     SHADOW is held on --float — only after the hero sheet clears — so it never casts a dividing
+     band across the continuous surface (the two-section seam). */
+  background: var(--surface-1);
   border-radius: 0 0 calc(var(--radius) * var(--dock)) calc(var(--radius) * var(--dock));
   box-shadow: 0 18px 40px -24px rgba(20, 40, 90, calc(.42 * var(--float)));
 }
@@ -792,7 +791,10 @@ main { position: relative; z-index: 2; }
 
 /* stage sits ABOVE the wordmark — the object overlaps the letters, like the reference */
 .hero-stage { position: absolute; inset: 0; display: grid; place-items: center; z-index: 3; pointer-events: none; }
-.orbwrap { position: relative; width: min(50vw, 540px); height: min(50vw, 540px); margin-top: 40px; perspective: 1200px; }
+/* lifted up so the cube's top crosses UP INTO the branded white sheet and overlaps the wordmark,
+   rendering in front of it (stage z-index 3 > head z-index 1) — a 3D object breaking above the
+   section line rather than sitting behind/below it */
+.orbwrap { position: relative; width: min(50vw, 540px); height: min(50vw, 540px); margin-top: -168px; perspective: 1200px; }
 /* atmospheric depth — a soft lime glow pooled behind the object (server-room energy) */
 .orbwrap::before {
   content: ""; position: absolute; inset: -22%; z-index: 0; pointer-events: none; border-radius: 50%;
