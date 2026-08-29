@@ -57,55 +57,42 @@
   <main id="main">
     <span id="top"></span>
 
-    <!-- HERO -->
+    <!-- HERO — signature wordmark + live WebGL centerpiece -->
     <section class="hero">
-      <div class="wrap hero-grid">
-        <div class="hero-copy reveal">
-          <p class="status-pill"><span class="dot" aria-hidden="true"></span>Early access, coming soon</p>
-          <h1>Send <span class="accent">anything</span>, between every device you own.</h1>
-          <p class="lede">Encrypted, direct, local. Move files between iPhone, Android, Windows, Mac and Linux. No cloud. No account.</p>
-          <div class="hero-cta">
-            <a class="btn btn-primary" href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access&amp;body=I'd%20like%20early%20access%20to%20LocoDrop.">Get early access</a>
-            <a class="btn btn-ghost" href="#how">See how it works</a>
-          </div>
-          <p class="hero-note">The fastest way to get a file from an iPhone to a Windows laptop, and back.</p>
-        </div>
+      <div class="wrap">
+        <div class="hero-panel reveal">
+          <p class="status-pill hero-pill"><span class="dot" aria-hidden="true"></span>Early access, coming soon</p>
+          <h1 class="hero-word">LocoDrop<span class="dot">.</span></h1>
 
-        <!-- Interactive transfer demo: a file hops, encrypted, from phone to laptop. -->
-        <div class="stage-wrap reveal" data-delay="1">
-          <div class="stage" id="stage" data-fit="460" aria-hidden="true">
-            <div class="stage-glass"></div>
-            <span class="stage-label">
-              <svg class="lk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-              Encrypted link, on your network
-            </span>
-
-            <!-- link path -->
-            <svg class="link-svg" viewBox="0 0 460 404">
-              <path class="link-track" d="M 128 300 C 190 150, 250 150, 320 132" />
-              <path class="link-flow"  d="M 128 300 C 190 150, 250 150, 320 132" />
-            </svg>
-
-            <!-- phone -->
-            <div class="dev dev-phone"><div class="dev-screen"></div></div>
-
-            <!-- laptop -->
-            <div class="dev dev-laptop">
-              <div class="dev-screen">
-                <span class="tile a"></span><span class="tile b"></span><span class="tile c"></span>
-                <span class="tile d"></span><span class="tile e" id="landing"></span>
+          <div class="hero-stage" aria-hidden="true">
+            <div class="orbwrap">
+              <div class="orb"></div>
+              <canvas id="orbGL"></canvas>
+              <div class="rings">
+                <svg viewBox="0 0 400 400">
+                  <ellipse class="r1" cx="200" cy="200" rx="196" ry="70" fill="none" stroke-width="1.6" transform="rotate(-18 200 200)"/>
+                  <ellipse class="r2" cx="200" cy="200" rx="188" ry="96" fill="none" stroke-width="1.6" transform="rotate(24 200 200)"/>
+                  <ellipse class="r3" cx="200" cy="200" rx="150" ry="150" fill="none" stroke-width="1.2" transform="rotate(6 200 200)"/>
+                </svg>
               </div>
-              <span class="base"></span>
             </div>
+          </div>
 
-            <!-- travelling encrypted packet -->
-            <div class="packet">
-              <div class="packet-card">
-                <svg class="file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                <span class="packet-lock">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-                </span>
-              </div>
+          <ul class="hero-midlist">
+            <li><b>/01</b> Local network</li>
+            <li><b>/02</b> Encrypted</li>
+            <li><b>/03</b> No account</li>
+          </ul>
+
+          <a class="hero-how" href="#how"><span class="pl" aria-hidden="true">▶</span><span>How it<br>works?</span></a>
+
+          <div class="hero-foot">
+            <div class="hero-lede">
+              <p>Send files straight between your own devices. Encrypted, on your local network. No cloud, no account.</p>
+            </div>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access&amp;body=I'd%20like%20early%20access%20to%20LocoDrop.">Get early access</a>
+              <a class="btn btn-ghost" href="#how">See how it works</a>
             </div>
           </div>
         </div>
@@ -409,6 +396,67 @@
         }, 2600);
       }
     })();
+  </script>
+
+  <!-- Hero centerpiece: self-contained WebGL chrome-and-Trust-Blue object (raymarched SDF).
+       Falls back to the CSS .orb if WebGL is unavailable; single still frame under reduced motion. -->
+  <script>
+  (function(){
+    var cv=document.getElementById('orbGL'); if(!cv) return;
+    var gl=null; try{ gl=cv.getContext('webgl',{alpha:true,premultipliedAlpha:false,antialias:true})
+      || cv.getContext('experimental-webgl',{alpha:true,premultipliedAlpha:false}); }catch(e){}
+    if(!gl) return; // CSS fallback orb stays visible
+    var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+    var fs=[
+     'precision highp float;uniform vec2 u_res;uniform float u_time;',
+     'mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}',
+     'float smin(float a,float b,float k){float h=clamp(0.5+0.5*(b-a)/k,0.,1.);return mix(b,a,h)-k*h*(1.-h);}',
+     'float map(vec3 p){float t=u_time;vec3 q=p;q.xz*=rot(t*0.3);q.yz*=rot(t*0.18);',
+     ' float d=length(q)-0.92;',
+     ' d=smin(d,length(q-vec3(0.5*sin(t),0.42*cos(t*1.1),0.28))-0.5,0.55);',
+     ' d=smin(d,length(q-vec3(-0.48*cos(t*0.9),-0.44*sin(t*1.2),-0.22))-0.46,0.55);return d;}',
+     'vec3 nrm(vec3 p){vec2 e=vec2(0.0013,0.);return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}',
+     'vec3 env(vec3 rd){float y=rd.y*0.5+0.5;vec3 c=mix(vec3(0.40),vec3(1.0),smoothstep(0.10,0.95,y));',
+     ' c+=vec3(1.0)*pow(smoothstep(0.72,1.0,y),2.0)*0.7;c+=vec3(0.90,0.94,1.0)*pow(smoothstep(0.46,0.54,y),8.0)*0.5;',
+     ' c*=mix(vec3(0.70,0.76,0.94),vec3(1.0),smoothstep(0.0,0.5,y));return c;}',
+     'void main(){vec2 uv=(gl_FragCoord.xy-0.5*u_res)/u_res.y;vec3 ro=vec3(0.,0.,3.05);vec3 rd=normalize(vec3(uv,-1.65));',
+     ' float t=0.;float d;bool hit=false;',
+     ' for(int i=0;i<90;i++){vec3 p=ro+rd*t;d=map(p);if(d<0.001){hit=true;break;}t+=d;if(t>6.5)break;}',
+     ' vec4 col=vec4(0.);',
+     ' if(hit){vec3 p=ro+rd*t;vec3 n=nrm(p);vec3 v=-rd;vec3 r=reflect(rd,n);vec3 refl=env(r);',
+     '  float fres=pow(1.0-max(dot(n,v),0.0),3.0);',
+     '  float band=sin(p.y*4.2+p.x*2.6+u_time*0.5)*0.5+0.5;band=smoothstep(0.42,0.72,band);',
+     '  vec3 blue=vec3(0.0,0.32,1.0);vec3 base=mix(refl,blue,band*0.80);',
+     '  vec3 L=normalize(vec3(0.55,0.85,0.5));float spec=pow(max(dot(r,L),0.0),60.0);',
+     '  base+=vec3(1.0)*spec*0.9;base+=fres*vec3(0.78,0.85,1.0)*0.55;col=vec4(base,1.0);}',
+     ' gl_FragColor=col;}'
+    ].join('\n');
+    function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+      return gl.getShaderParameter(s,gl.COMPILE_STATUS)?s:null;}
+    var v=sh(gl.VERTEX_SHADER,vs),f=sh(gl.FRAGMENT_SHADER,fs); if(!v||!f) return;
+    var pr=gl.createProgram();gl.attachShader(pr,v);gl.attachShader(pr,f);gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS)) return;
+    gl.useProgram(pr);
+    var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    var loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    var uRes=gl.getUniformLocation(pr,'u_res'),uTime=gl.getUniformLocation(pr,'u_time');
+    gl.clearColor(0,0,0,0);
+    function size(){var dpr=Math.min(window.devicePixelRatio||1,2);var w=cv.clientWidth||1,h=cv.clientHeight||1;
+      var W=Math.round(w*dpr),H=Math.round(h*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}gl.viewport(0,0,cv.width,cv.height);}
+    cv.classList.add('on');
+    var fb=document.querySelector('.orb'); if(fb) fb.style.opacity='0';
+    var start=null,raf=null,visible=true;
+    function frame(ts){if(start===null)start=ts;var tm=reduce?0.7:(ts-start)/1000;
+      size();gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,tm);
+      gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
+      raf=(!reduce&&visible)?requestAnimationFrame(frame):null;}
+    raf=requestAnimationFrame(frame);
+    if(!reduce){ try{ new IntersectionObserver(function(es){visible=es[0].isIntersecting;
+      if(visible&&raf===null){raf=requestAnimationFrame(frame);}
+      else if(!visible&&raf){cancelAnimationFrame(raf);raf=null;} },{threshold:0}).observe(cv);}catch(e){} }
+  })();
   </script>
 </body>
 </html>
