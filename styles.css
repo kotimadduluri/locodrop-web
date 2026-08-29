@@ -658,3 +658,25 @@ main { position: relative; z-index: 2; }
   .hero-actions { flex-direction: column; }
   .hero-actions .btn { width: 100%; }
 }
+
+/* ============================================================
+   Dark feature section (#why) — Sapforce-style dark cards.
+   Always dark (light hero -> dark features), both site themes.
+   ============================================================ */
+#why { background: #0f1317; border-top: 1px solid #1e242b; border-bottom: 1px solid #1e242b; }
+#why .eyebrow { color: var(--accent); }
+#why h2 { color: #f4f6f9; }
+#why .section-sub { color: #a2a8b0; }
+#why .mark { background: var(--accent); color: #fff; border-radius: 10px; padding: 0 .3em;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+#why .cell { background: #171c22; border-color: #262c34; box-shadow: none; }
+#why .cell:hover { border-color: #3a424c; box-shadow: 0 22px 46px -30px rgba(0,0,0,.65); }
+#why .cell h3 { color: #f4f6f9; padding-bottom: 14px; margin-bottom: 12px; border-bottom: 1px dotted #39414c; }
+#why .cell p { color: #a2a8b0; }
+#why .cell-icon { width: 46px; height: 46px; border-radius: 50%; background: #12161b;
+  border: 1px solid #2a313a; color: var(--accent); }
+#why .cell.feature { background: linear-gradient(145deg, #0052ff, #3f78ff); border-color: transparent; }
+#why .cell.feature h3 { border-bottom-color: rgba(255,255,255,.35); }
+#why .cell.feature .cell-icon { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.22); color: #fff; }
+#why .cell.dark-panel { background: #12161b; }
+#why .big-num { color: #f4f6f9; }
