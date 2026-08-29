@@ -154,15 +154,14 @@ img, svg { display: block; }
   border-radius: 0 0 var(--radius) var(--radius);
   box-shadow: 0 14px 32px -20px rgba(20, 40, 90, .32);
 }
-/* brand is collapsed at the top; it slides + fades in as you scroll (shared hand-off from the hero
-   wordmark). Bare on the white header bar — the bar itself IS the brand's white background (reference). */
+/* brand = invisible spacer that reserves the docked wordmark's slot, so the nav sits to its right.
+   The visible brand IS the traveling #brandFlip wordmark that docks here on scroll. (In reduced-
+   motion mode this element becomes the visible fallback brand — see the reduced-motion block.) */
 .brand {
-  display: inline-flex; align-items: center; gap: 9px; color: var(--text);
+  display: inline-flex; align-items: center; color: var(--text); flex-shrink: 0;
   font-weight: 800; font-family: var(--font-display); letter-spacing: -0.035em; font-size: 1.18rem;
-  max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; transform: translateX(-8px);
-  transition: max-width .45s var(--ease), opacity .3s var(--ease), transform .45s var(--ease);
+  width: 132px; overflow: hidden; white-space: nowrap; visibility: hidden;
 }
-.site-header.scrolled .brand { max-width: 220px; opacity: 1; transform: none; }
 .brand-mark { display: inline-flex; color: var(--accent); flex-shrink: 0; }
 .nav-pill { display: flex; align-items: center; gap: 2px; background: var(--bg-deep); border-radius: 14px; padding: 5px; }
 .nav-pill a { color: var(--text-muted); font-size: .92rem; font-weight: 600; padding: 8px 15px; border-radius: 10px; transition: color .16s var(--ease), background-color .16s var(--ease); }
@@ -589,6 +588,16 @@ main { position: relative; z-index: 2; }
 /* period is part of the wordmark (reference is monochrome, attached) — no accent override
    that would break the background-clip and render a square block */
 .hero-word .dot { margin-left: -0.04em; }
+
+/* ghost = the in-flow <h1>: reserves hero space + is the SEO/a11y heading, but invisible.
+   The visible wordmark is the fixed --flip element that travels into the header on scroll. */
+.hero-word--ghost { opacity: 0; pointer-events: none; }
+.hero-word--flip {
+  position: fixed; left: 0; top: 0; margin: 0; z-index: 55;
+  transform-origin: 0 0; pointer-events: none; will-change: transform;
+}
+/* until JS measures + positions it, keep it off-screen so it can't flash centered at 0,0 */
+.hero-word--flip:not(.ready) { opacity: 0; }
 @keyframes wordSheen { 0% { background-position: 170% 0; } 60%, 100% { background-position: -30% 0; } }
 
 /* stage sits ABOVE the wordmark — the object overlaps the letters, like the reference */
@@ -662,6 +671,8 @@ main { position: relative; z-index: 2; }
   .orb, .rings .spin, .rings .spin2, #orbGL { animation: none; }
   .hero-word { animation: none; background: linear-gradient(180deg, var(--text), var(--text-faint));
     -webkit-background-clip: text; background-clip: text; }
+  /* no travelling wordmark: show a static header brand instead (JS hides the flip, shows the ghost) */
+  .brand { visibility: visible; width: auto; }
 }
 
 @media (max-width: 900px) {

@@ -47,6 +47,10 @@
     </div>
   </header>
 
+  <!-- Traveling brand: fixed overlay that IS the hero wordmark at the top, and shrinks + moves
+       into the header brand slot as you scroll (single shared element). JS drives the transform. -->
+  <div class="hero-word hero-word--flip" aria-hidden="true">LocoDrop<span class="dot">.</span></div>
+
   <main id="main">
     <span id="top"></span>
 
@@ -54,7 +58,10 @@
     <section class="hero">
       <div class="wrap">
         <div class="hero-panel reveal">
-          <h1 class="hero-word">LocoDrop<span class="dot">.</span></h1>
+          <!-- ghost: in-flow heading that reserves the hero space + is the real <h1> for SEO/a11y.
+               It's invisible; the traveling #brandFlip below renders the visible wordmark and, on
+               scroll, shrinks + moves up into the header brand slot (shared-element hand-off). -->
+          <h1 class="hero-word hero-word--ghost">LocoDrop<span class="dot">.</span></h1>
 
           <div class="hero-stage" aria-hidden="true">
             <div class="orbwrap">
@@ -347,25 +354,45 @@
         animSections.forEach(function (el) { animIo.observe(el); });
       }
 
-      // Shared brand transition: the giant hero wordmark shrinks + fades as the nav
-      // logo takes over on scroll, so the app name reads as one element handing off.
+      // Shared-element brand: one wordmark. #brandFlip renders it, sitting exactly over the
+      // ghost <h1> at the top; as you scroll it shrinks + moves up into the header brand slot,
+      // and grows back on scroll up. A single element travelling between the two positions.
       var header = document.querySelector('.site-header');
-      var heroWord = document.querySelector('.hero-word');
-      var heroSection = document.querySelector('.hero');
+      var ghost = document.querySelector('.hero-word--ghost');
+      var flip = document.querySelector('.hero-word--flip');
+      var DOCK_LEFT = 28, DOCK_TOP = 17, DOCK_FONT = 18.9;  // header brand slot (px)
+      var TRAVEL = 260;                                     // scroll distance over which it docks
+      var src = null;                                       // measured hero position (viewport, at scroll 0)
+
+      var measure = function () {
+        if (!ghost || !flip) return;
+        var y = window.scrollY;
+        var r = ghost.getBoundingClientRect();
+        src = { left: r.left, top: r.top + y, font: parseFloat(getComputedStyle(ghost).fontSize) };
+        flip.style.fontSize = src.font + 'px';
+        flip.classList.add('ready');
+      };
+      var lerp = function (a, b, t) { return a + (b - a) * t; };
+
       var onScroll = function () {
         var y = window.scrollY;
-        var h = heroSection ? heroSection.offsetHeight : 640;
-        var p = Math.min(1, y / (h * 0.5));            // transition band = first ~50% of the hero
-        // Hand off exactly once: the giant wordmark shrinks + RISES into the header bar
-        // and fades out at the same instant the brand chip fades in — one logo moving.
-        header.classList.toggle('scrolled', p > 0.5);
-        if (heroWord && !reduce) {
-          heroWord.style.transform = 'translateY(' + (-p * 54).toFixed(1) + 'px) scale(' + (1 - p * 0.52).toFixed(3) + ')';
-          heroWord.style.opacity = Math.max(0, 1 - p * 1.9).toFixed(3);  // gone by the handoff point
-        }
+        header.classList.toggle('scrolled', y > TRAVEL * 0.6);
+        if (!src || !flip) return;
+        if (reduce) return;                                // reduced-motion path handled in CSS
+        var p = Math.min(1, Math.max(0, y / TRAVEL));
+        var sp = Math.min(1, p / 0.5);                     // shrink front-loaded: small before it rises
+        var x  = lerp(src.left, DOCK_LEFT, p);
+        var ty = lerp(src.top,  DOCK_TOP,  p);
+        var sc = lerp(1, DOCK_FONT / src.font, sp);
+        flip.style.transform = 'translate(' + x.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + sc.toFixed(4) + ')';
       };
+
+      if (reduce && flip) { flip.style.display = 'none'; if (ghost) ghost.style.opacity = '1'; }
+      measure();
       onScroll();
       window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', function () { measure(); onScroll(); }, { passive: true });
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function () { measure(); onScroll(); }); }
 
       // Scale each fixed coordinate stage ([data-fit]=base width) to fit its wrap,
       // so every pixel offset-path stays aligned with its devices/nodes.
