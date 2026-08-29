@@ -146,13 +146,13 @@ img, svg { display: block; }
   display: flex; align-items: center; gap: 16px;
   padding: 13px 28px; width: 100%;
   background: var(--surface-1);
-  border-bottom: 1px solid transparent;
-  border-radius: 0 0 var(--radius) var(--radius);
-  transition: box-shadow .3s var(--ease), border-color .3s var(--ease);
+  border-radius: 0;                 /* square at the top — it continues the white sheet */
+  transition: box-shadow .3s var(--ease), border-radius .3s var(--ease);
 }
+/* once scrolled it detaches into a rounded-bottom bar over the section below */
 .site-header.scrolled .header-inner {
-  border-bottom-color: var(--line);
-  box-shadow: 0 12px 30px -20px rgba(20, 40, 90, .28);
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: 0 14px 32px -20px rgba(20, 40, 90, .32);
 }
 /* brand is collapsed at the top; it slides + fades in as you scroll (shared hand-off from the hero wordmark) */
 .brand {
@@ -554,9 +554,12 @@ main { position: relative; z-index: 2; }
    ============================================================ */
 .hero-panel {
   position: relative; overflow: hidden; min-height: 660px;
-  /* full-bleed, flush under the header; white top zone -> grey bottom zone */
-  background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-1) 34%,
-                             var(--bg-deep) 62%, var(--bg-deep) 100%);
+  background: var(--bg-deep);       /* grey body */
+}
+/* crisp white sheet with a rounded bottom edge, continuing the header — the wordmark sits on it */
+.hero-panel::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 46%; z-index: 0;
+  background: var(--surface-1); border-radius: 0 0 36px 36px;
 }
 
 /* in-panel nav: links-pill left, CTA right, no logo (the wordmark is the brand) */
@@ -582,7 +585,7 @@ main { position: relative; z-index: 2; }
   animation: wordSheen 5.5s cubic-bezier(.5, 0, .2, 1) infinite;
   transform-origin: 50% 0; will-change: transform, opacity;
 }
-.hero-word .dot { color: var(--accent); -webkit-text-fill-color: var(--accent); }
+.hero-word .dot { color: var(--accent); -webkit-text-fill-color: var(--accent); margin-left: -0.06em; }
 @keyframes wordSheen { 0% { background-position: 170% 0; } 60%, 100% { background-position: -30% 0; } }
 
 /* stage sits ABOVE the wordmark — the object overlaps the letters, like the reference */
@@ -619,17 +622,17 @@ main { position: relative; z-index: 2; }
 .rings .r-f2 { stroke: var(--line-strong); stroke-width: 1; opacity: .7; }
 
 .hero-midlist {
-  position: absolute; right: 30px; top: 44%; z-index: 4; list-style: none; margin: 0; padding: 0;
+  position: absolute; right: 30px; top: 48%; z-index: 4; list-style: none; margin: 0; padding: 0;
 }
 .hero-midlist li {
-  display: flex; gap: 18px; justify-content: flex-end; align-items: baseline; padding: 7px 0; min-width: 196px;
-  font-size: 14px; font-weight: 500; color: var(--text-muted); border-bottom: 1px solid var(--line);
+  display: flex; gap: 18px; justify-content: flex-end; align-items: baseline; padding: 6px 0; min-width: 196px;
+  font-size: 14px; font-weight: 500; color: var(--text-muted);
 }
 .hero-midlist b { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
 
 .hero-how {
-  position: absolute; right: 34px; bottom: 120px; z-index: 4;
-  width: 116px; height: 116px; border-radius: 50%;
+  position: absolute; right: 40px; bottom: 48px; z-index: 5;
+  width: 128px; height: 128px; border-radius: 50%;
   display: grid; place-items: center; text-align: center; line-height: 1.2; text-decoration: none;
   background: var(--accent); color: var(--accent-ink);
   font-family: var(--font-body); font-weight: 600; font-size: 14px;
