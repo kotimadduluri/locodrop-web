@@ -154,17 +154,15 @@ img, svg { display: block; }
   border-radius: 0 0 var(--radius) var(--radius);
   box-shadow: 0 14px 32px -20px rgba(20, 40, 90, .32);
 }
-/* brand is collapsed at the top; it slides + fades in as you scroll (shared hand-off from the hero wordmark).
-   Sits in a white chip (reference), separated from the header by a hairline + soft shadow. */
+/* brand is collapsed at the top; it slides + fades in as you scroll (shared hand-off from the hero
+   wordmark). Bare on the white header bar — the bar itself IS the brand's white background (reference). */
 .brand {
   display: inline-flex; align-items: center; gap: 9px; color: var(--text);
-  font-weight: 700; font-family: var(--font-display); letter-spacing: -0.03em; font-size: 1.06rem;
+  font-weight: 800; font-family: var(--font-display); letter-spacing: -0.035em; font-size: 1.18rem;
   max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; transform: translateX(-8px);
-  background: var(--surface-1); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
-  border-radius: var(--pill); padding: 0;
-  transition: max-width .45s var(--ease), opacity .3s var(--ease), transform .45s var(--ease), padding .45s var(--ease);
+  transition: max-width .45s var(--ease), opacity .3s var(--ease), transform .45s var(--ease);
 }
-.site-header.scrolled .brand { max-width: 220px; opacity: 1; transform: none; padding: 7px 16px 7px 11px; }
+.site-header.scrolled .brand { max-width: 220px; opacity: 1; transform: none; }
 .brand-mark { display: inline-flex; color: var(--accent); flex-shrink: 0; }
 .nav-pill { display: flex; align-items: center; gap: 2px; background: var(--bg-deep); border-radius: 14px; padding: 5px; }
 .nav-pill a { color: var(--text-muted); font-size: .92rem; font-weight: 600; padding: 8px 15px; border-radius: 10px; transition: color .16s var(--ease), background-color .16s var(--ease); }
@@ -578,17 +576,19 @@ main { position: relative; z-index: 2; }
   position: relative; z-index: 1; text-align: center; padding: 18px 28px 0;
   font-family: var(--font-display); font-weight: 900;
   font-size: clamp(58px, 14.6vw, 208px); line-height: .82; letter-spacing: -.055em;
-  /* animated sheen sweep — the app name's transition effect */
+  /* monochrome dark wordmark with a metallic SILVER sheen sweep (reference is mono, no accent) */
   background: linear-gradient(100deg,
-    var(--text) 0%, var(--text) 40%,
-    var(--accent) 49%, #7ba3ff 51%,
+    var(--text) 0%, var(--text) 42%,
+    #9aa1ad 49%, #ccd1d9 51%,
     var(--text) 60%, var(--text) 100%);
   background-size: 240% 100%; background-position: 170% 0;
   -webkit-background-clip: text; background-clip: text; color: transparent;
   animation: wordSheen 5.5s cubic-bezier(.5, 0, .2, 1) infinite;
   transform-origin: 50% 0; will-change: transform, opacity;
 }
-.hero-word .dot { color: var(--accent); -webkit-text-fill-color: var(--accent); margin-left: -0.06em; }
+/* period is part of the wordmark (reference is monochrome, attached) — no accent override
+   that would break the background-clip and render a square block */
+.hero-word .dot { margin-left: -0.04em; }
 @keyframes wordSheen { 0% { background-position: 170% 0; } 60%, 100% { background-position: -30% 0; } }
 
 /* stage sits ABOVE the wordmark — the object overlaps the letters, like the reference */
@@ -631,7 +631,7 @@ main { position: relative; z-index: 2; }
   display: flex; gap: 18px; justify-content: flex-end; align-items: baseline; padding: 6px 0; min-width: 196px;
   font-size: 14px; font-weight: 500; color: var(--text-muted);
 }
-.hero-midlist b { font-family: var(--font-mono); font-weight: 600; color: var(--accent); }
+.hero-midlist b { font-family: var(--font-mono); font-weight: 600; color: var(--text-faint); }
 
 .hero-how {
   position: absolute; right: 40px; bottom: 48px; z-index: 5;
