@@ -185,7 +185,9 @@ main { position: relative; z-index: 2; }
 }
 
 /* ---------- Hero ---------- */
-.hero { position: relative; padding: 16px 0 clamp(40px, 6vw, 72px); overflow: hidden; }
+/* Hero panel is near full-bleed with a small, even margin all around (matches the reference frame). */
+.hero { position: relative; padding: 0; overflow: hidden; background: var(--bg-deep); }
+.hero > .wrap { max-width: none; margin: 0; padding: 16px; }
 .hero::before {
   content: ""; position: absolute; z-index: 0;
   top: -22%; right: -8%; width: 62vw; height: 62vw; max-width: 780px; max-height: 780px;
