@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LocoDrop - Private file transfer across all your devices</title>
   <meta name="description" content="LocoDrop moves files directly between your phones and computers over your local network. Encrypted end to end, no cloud, no account. Android, iPhone, Windows, Mac and Linux." />
-  <meta name="theme-color" content="#0052FF" />
+  <meta name="theme-color" content="#c6f04d" />
   <meta name="color-scheme" content="light dark" />
 
   <!-- Open Graph / social -->
@@ -19,24 +19,29 @@
 
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 
-  <!-- Typefaces matched to the app (LOC-69): Geist (display + body) + JetBrains Mono (utility labels).
-       CDN per project decision; system stack is the fallback. -->
+  <!-- Type: Bricolage Grotesque (display + wordmark), Archivo (body/nav), JetBrains Mono (labels). -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..900&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@800;900&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
+  <div class="margin-spine left"  aria-hidden="true">Local-first&nbsp;&nbsp;·&nbsp;&nbsp;Encrypted&nbsp;&nbsp;·&nbsp;&nbsp;No&nbsp;account</div>
+  <div class="margin-spine right" aria-hidden="true"><span class="dim">v0.1</span>&nbsp;&nbsp;·&nbsp;&nbsp;Working&nbsp;build&nbsp;&nbsp;·&nbsp;&nbsp;<span class="dim">2026</span></div>
   <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- Fixed-width page frame: the whole page is a rounded card centered on a grey backdrop,
+       with a gap above (matches the reference template). Header sits at the top of the card. -->
+  <div class="frame">
 
   <!-- Persistent full-width header bar. The brand is hidden at the top (the giant hero
        wordmark IS the brand) and slides in here as you scroll — a shared hand-off. -->
   <header class="site-header">
     <div class="header-inner">
       <!-- brand is text only (no icon) — it's the same wordmark as the hero, handed off on scroll -->
-      <a class="brand" href="#top" aria-label="LocoDrop home"><span>LocoDrop<span class="brand-dot">.</span></span></a>
+      <a class="brand" href="#top" aria-label="LocoDrop home"><span>LocoDrop</span></a>
       <nav class="nav-pill" aria-label="Primary">
         <a href="#how">How it works</a>
         <a href="#why">Why LocoDrop</a>
@@ -49,7 +54,7 @@
 
   <!-- Traveling brand: fixed overlay that IS the hero wordmark at the top, and shrinks + moves
        into the header brand slot as you scroll (single shared element). JS drives the transform. -->
-  <div class="hero-word hero-word--flip" aria-hidden="true">LocoDrop<span class="dot">.</span></div>
+  <div class="hero-word hero-word--flip" aria-hidden="true">LocoDrop</div>
 
   <main id="main">
     <span id="top"></span>
@@ -58,10 +63,12 @@
     <section class="hero">
       <div class="wrap">
         <div class="hero-panel reveal">
-          <!-- ghost: in-flow heading that reserves the hero space + is the real <h1> for SEO/a11y.
-               It's invisible; the traveling #brandFlip below renders the visible wordmark and, on
-               scroll, shrinks + moves up into the header brand slot (shared-element hand-off). -->
-          <h1 class="hero-word hero-word--ghost">LocoDrop<span class="dot">.</span></h1>
+          <!-- White head block (rounded bottom) holds the wordmark low in it, like the reference.
+               This <h1> is the real, visible brand + the SEO/a11y heading. The traveling #brandFlip
+               overlay takes over only while scrolling, docking into the header brand slot. -->
+          <div class="hero-head">
+            <h1 class="hero-word hero-word--ghost">LocoDrop</h1>
+          </div>
 
           <div class="hero-stage" aria-hidden="true">
             <div class="orbwrap">
@@ -88,7 +95,7 @@
             <li>No account <b>/03</b></li>
           </ul>
 
-          <a class="hero-how" href="#how"><span class="pl" aria-hidden="true">▶</span><span>How it<br>works?</span></a>
+          <a class="hero-how" href="#how"><span class="pl" aria-hidden="true">▶</span><span>How it works?</span></a>
 
           <div class="hero-foot">
             <p class="status-pill hero-pill"><span class="dot" aria-hidden="true"></span>Early access, coming soon</p>
@@ -106,15 +113,20 @@
       <div class="mesh-wrap reveal">
         <div class="mesh-stage">
         <div class="mesh" id="mesh" data-fit="900" aria-hidden="true">
-          <!-- faint links between the nodes -->
+          <!-- the persistent mesh: a constant glowing rail (the network fabric) with a live data
+               pulse travelling over it. Paths are defined once and referenced twice via <use>. -->
           <svg class="mesh-links" viewBox="0 0 900 260">
-            <path class="ln" d="M95,158 C150,100 220,80 285,66"/>
-            <path class="ln" d="M285,66 C345,100 405,145 460,178"/>
-            <path class="ln" d="M460,178 C520,130 585,95 640,70"/>
-            <path class="ln" d="M640,70 C705,90 765,120 818,150"/>
-            <path class="ln" d="M95,158 C210,70 350,80 460,178"/>
-            <path class="ln" d="M460,178 C570,240 720,235 818,150"/>
-            <path class="ln" d="M285,66 C400,26 520,26 640,70"/>
+            <defs>
+              <path id="ml1" d="M95,158 C150,100 220,80 285,66"/>
+              <path id="ml2" d="M285,66 C345,100 405,145 460,178"/>
+              <path id="ml3" d="M460,178 C520,130 585,95 640,70"/>
+              <path id="ml4" d="M640,70 C705,90 765,120 818,150"/>
+              <path id="ml5" d="M95,158 C210,70 350,80 460,178"/>
+              <path id="ml6" d="M460,178 C570,240 720,235 818,150"/>
+              <path id="ml7" d="M285,66 C400,26 520,26 640,70"/>
+            </defs>
+            <g class="rail"><use href="#ml1"/><use href="#ml2"/><use href="#ml3"/><use href="#ml4"/><use href="#ml5"/><use href="#ml6"/><use href="#ml7"/></g>
+            <g class="flow"><use href="#ml1"/><use href="#ml2"/><use href="#ml3"/><use href="#ml4"/><use href="#ml5"/><use href="#ml6"/><use href="#ml7"/></g>
           </svg>
 
           <!-- device nodes -->
@@ -202,49 +214,55 @@
     <!-- WHY: bento -->
     <section id="why" class="section section-alt">
       <div class="wrap">
-        <div class="section-head reveal">
-          <p class="eyebrow">Why LocoDrop</p>
-          <h2>Built to stay out of the <span class="mark">cloud</span>.</h2>
-          <p class="section-sub">No middleman, no upload, no account. Your files go where you send them and nowhere else.</p>
+        <div class="section-head center reveal">
+          <h2>Everything you'd want from a <span class="mark">private drop.</span></h2>
         </div>
 
-        <div class="bento">
-          <article class="cell feature reveal">
-            <span class="cell-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 4.4 3.2 8.3 8 9 4.8-.7 8-4.6 8-9V5z"/><path d="m9 12 2 2 4-4"/></svg>
-            </span>
-            <h3>Private by design</h3>
-            <p>Transfers are encrypted end to end and run directly between your devices. File contents are never uploaded, mined, or logged, by us or anyone else.</p>
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <div class="fc-icons" aria-hidden="true">
+              <span class="fc-chip"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 4.4 3.2 8.3 8 9 4.8-.7 8-4.6 8-9V5z"/><path d="m9 12 2 2 4-4"/></svg></span>
+              <span class="fc-chip"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+            </div>
+            <div class="fc-body">
+              <h3>Private<br>by design</h3>
+              <div class="fc-rule" aria-hidden="true"></div>
+              <p>Encrypted end to end, directly between your devices. Never uploaded or logged.</p>
+            </div>
           </article>
 
-          <article class="cell dark-panel reveal" data-delay="1">
-            <p class="big-num">0</p>
-            <h3>Servers in the middle</h3>
-            <p>Your files never touch our infrastructure, because there isn't any in the path.</p>
+          <article class="feature-card reveal" data-delay="1">
+            <div class="fc-icons" aria-hidden="true">
+              <span class="fc-chip"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+            </div>
+            <div class="fc-body">
+              <h3>No<br>account</h3>
+              <div class="fc-rule" aria-hidden="true"></div>
+              <p>No sign-up, no email. Pair your devices once and send. Free, forever.</p>
+            </div>
           </article>
 
-          <article class="cell half reveal">
-            <span class="cell-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 18v3"/></svg>
-            </span>
-            <h3>No account</h3>
-            <p>No sign-up, no email, no password. Pair your devices once and start sending. Core features are free, forever.</p>
+          <article class="feature-card reveal" data-delay="2">
+            <div class="fc-icons" aria-hidden="true">
+              <span class="fc-chip"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8.5 15.5a3.5 3.5 0 0 1 7 0"/><circle cx="12" cy="18.5" r="1"/><path d="m3 3 18 18"/></svg></span>
+              <span class="fc-chip"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></span>
+            </div>
+            <div class="fc-body">
+              <h3>Works<br>offline</h3>
+              <div class="fc-rule" aria-hidden="true"></div>
+              <p>Files move over your local network. No Wi-Fi? Make one phone a hotspot.</p>
+            </div>
           </article>
 
-          <article class="cell half reveal" data-delay="1">
-            <span class="cell-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8.5 15.5a3.5 3.5 0 0 1 7 0"/><circle cx="12" cy="18.5" r="1"/><path d="m3 3 18 18"/></svg>
-            </span>
-            <h3>Works with the internet down</h3>
-            <p>Files move over your local network, not through anyone's servers. It's fast on Wi-Fi, and if there's no Wi-Fi nearby you can make one phone a hotspot and send from the other.</p>
-          </article>
-
-          <article class="cell half reveal" data-delay="2">
-            <span class="cell-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg>
-            </span>
-            <h3>Every platform, first class</h3>
-            <p>iPhone to Windows, Android to Mac, Linux to anything. The painful pairs are the ones LocoDrop is built for.</p>
+          <article class="feature-card reveal" data-delay="3">
+            <div class="fc-icons" aria-hidden="true">
+              <span class="fc-chip"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg></span>
+            </div>
+            <div class="fc-body">
+              <h3>Every<br>platform</h3>
+              <div class="fc-rule" aria-hidden="true"></div>
+              <p>iPhone to Windows, Android to Mac, Linux to anything. Every pair.</p>
+            </div>
           </article>
         </div>
       </div>
@@ -293,7 +311,7 @@
       <div class="wrap">
         <div class="cta-inner reveal">
           <div>
-            <h2>Be first to try it.</h2>
+            <h2>Be <span class="mark">first</span> to try it.</h2>
             <p>We'll email you once early access opens. No spam, no account, no strings.</p>
           </div>
           <a class="btn btn-primary btn-lg" href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access&amp;body=I'd%20like%20early%20access%20to%20LocoDrop.">Get early access</a>
@@ -304,28 +322,45 @@
 
   <footer class="site-footer">
     <div class="wrap footer-inner">
-      <div class="footer-brand">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
-            <rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="currentColor"/>
-            <circle cx="8" cy="12" r="2.1" fill="#fff"/>
-            <circle cx="16" cy="12" r="2.1" fill="#fff"/>
-            <path d="M10 12h4" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
-          </svg>
-        </span>
-        <span>LocoDrop</span>
+      <div class="footer-top">
+        <div class="footer-lead">
+          <a class="footer-brand" href="#top" aria-label="LocoDrop home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+                <rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="currentColor"/>
+                <circle cx="8" cy="12" r="2.1" fill="#0a0b0e"/>
+                <circle cx="16" cy="12" r="2.1" fill="#0a0b0e"/>
+                <path d="M10 12h4" stroke="#0a0b0e" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span>LocoDrop</span>
+          </a>
+          <p class="footer-tag">Privacy-first, local-first file transfer for every device you own. No cloud, no account.</p>
+          <a class="btn btn-sm btn-primary" href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access">Get early access <span class="cta-ar" aria-hidden="true">→</span></a>
+        </div>
+        <nav class="footer-cols" aria-label="Footer">
+          <div class="footer-col">
+            <p class="footer-col-title">Product</p>
+            <a href="#how">How it works</a>
+            <a href="#why">Why LocoDrop</a>
+            <a href="#platforms">Platforms</a>
+            <a href="#faq">FAQ</a>
+          </div>
+          <div class="footer-col">
+            <p class="footer-col-title">Connect</p>
+            <a href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access">Early access</a>
+            <a href="mailto:maddulurikoti@gmail.com">Contact</a>
+          </div>
+        </nav>
       </div>
-      <p class="footer-tag">Privacy-first, local-first file transfer for every device you own.</p>
-      <nav class="footer-links" aria-label="Footer">
-        <a href="#how">How it works</a>
-        <a href="#why">Why LocoDrop</a>
-        <a href="#platforms">Platforms</a>
-        <a href="#faq">FAQ</a>
-        <a href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access">Get early access</a>
-      </nav>
-      <p class="footer-fine">&copy; 2026 LocoDrop. Working name, pre-release. Not affiliated with Apple, Google, or Microsoft. Platform names are trademarks of their respective owners.</p>
+      <div class="footer-bottom">
+        <p class="footer-fine">&copy; 2026 LocoDrop — working name, pre-release. Not affiliated with Apple, Google, or Microsoft. Platform names are trademarks of their respective owners.</p>
+        <p class="footer-meta">Local-first&nbsp;·&nbsp;Encrypted&nbsp;·&nbsp;No&nbsp;account</p>
+      </div>
     </div>
   </footer>
+
+  </div><!-- /.frame -->
 
   <script>
     (function () {
@@ -358,9 +393,10 @@
       // ghost <h1> at the top; as you scroll it shrinks + moves up into the header brand slot,
       // and grows back on scroll up. A single element travelling between the two positions.
       var header = document.querySelector('.site-header');
+      var brand = document.querySelector('.brand');
       var ghost = document.querySelector('.hero-word--ghost');
       var flip = document.querySelector('.hero-word--flip');
-      var DOCK_TOP = 17, DOCK_FONT = 18.9;                  // header brand slot (px); left = panel left
+      var DOCK_TOP = 17, DOCK_FONT = 18.9, DOCK_LEFT = 28;  // header brand slot; left is measured (frame is centered)
       var TRAVEL = 260;                                     // scroll distance over which it docks
       var src = null;                                       // measured hero position (viewport, at scroll 0)
 
@@ -368,12 +404,15 @@
 
       // size the wordmark so it spans the full (inset) panel width, like the reference
       var fitWord = function () {
-        if (!ghost || !panel) return;
+        if (!ghost) return;
+        var head = ghost.parentElement;                    // the white head block (has side padding)
+        if (!head) return;
         ghost.style.fontSize = '';                         // back to the CSS clamp to measure
         var cur = parseFloat(getComputedStyle(ghost).fontSize);
         var range = document.createRange(); range.selectNodeContents(ghost);
         var tw = range.getBoundingClientRect().width;
-        var avail = panel.clientWidth;                     // gutter already insets the panel
+        var hs = getComputedStyle(head);
+        var avail = head.clientWidth - parseFloat(hs.paddingLeft) - parseFloat(hs.paddingRight);
         if (tw > 0 && avail > 0) ghost.style.fontSize = Math.max(40, cur * avail / tw) + 'px';
       };
 
@@ -381,23 +420,54 @@
         if (!ghost || !flip) return;
         fitWord();
         var y = window.scrollY;
+        if (brand) {
+          var br = brand.getBoundingClientRect();       // the real (centered) header brand slot
+          DOCK_LEFT = br.left;                          // content-left (frame gutter + padding)
+          // vertical-center the docked wordmark on the slot; the flip's line-height (.82) seats
+          // its glyphs high in its box, so offset by half that line box to match the nav pill.
+          DOCK_TOP = br.top + br.height / 2 - DOCK_FONT * 0.41;
+        }
         var r = ghost.getBoundingClientRect();
         src = { left: r.left, top: r.top + y, font: parseFloat(getComputedStyle(ghost).fontSize) };
         flip.style.fontSize = src.font + 'px';
         flip.classList.add('ready');
+        if (!reduce) { target = curp = Math.min(1, Math.max(0, window.scrollY / TRAVEL)); render(curp); }
       };
       var lerp = function (a, b, t) { return a + (b - a) * t; };
+      // easeInOutCubic — accelerate out of the hero, decelerate into the header slot
+      var easeInOut = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+
+      // The hand-off is smoothed: raw scroll only sets a TARGET; a rAF loop eases the rendered
+      // progress toward it, so the wordmark glides with weight instead of stepping frame-for-frame
+      // with the wheel. That inertia — plus the eased curve — is what makes it feel rich.
+      var target = 0, curp = 0, ticking = false;
+      var render = function (p) {
+        var e = easeInOut(p);                              // coordinated position curve
+        var es = easeInOut(Math.min(1, p / 0.62));         // scale leads slightly (shrinks before it seats)
+        var ty = lerp(src.top, DOCK_TOP, e);               // rises from the hero into the header slot
+        var tx = lerp(src.left, DOCK_LEFT, e);             // slides from the hero edge to the header content-left
+        var sc = lerp(1, DOCK_FONT / src.font, es);
+        flip.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px,0) scale(' + sc.toFixed(4) + ')';
+        // crossfade the fixed overlay in over the identical resting wordmark — seamless, no binary pop
+        var vis = Math.min(1, p * 14);
+        flip.style.opacity = vis;
+        ghost.style.opacity = 1 - vis;
+      };
+      var tick = function () {
+        curp += (target - curp) * 0.16;                    // inertial ease toward the scroll target
+        if (Math.abs(target - curp) < 0.0004) { curp = target; ticking = false; }
+        render(curp);
+        if (ticking) requestAnimationFrame(tick);
+      };
+      var kick = function () { if (!ticking) { ticking = true; requestAnimationFrame(tick); } };
 
       var onScroll = function () {
         var y = window.scrollY;
         header.classList.toggle('scrolled', y > TRAVEL * 0.6);
         if (!src || !flip) return;
         if (reduce) return;                                // reduced-motion path handled in CSS
-        var p = Math.min(1, Math.max(0, y / TRAVEL));
-        var sp = Math.min(1, p / 0.5);                     // shrink front-loaded: small before it rises
-        var ty = lerp(src.top, DOCK_TOP, p);               // left edge stays at the panel gutter; only rises + shrinks
-        var sc = lerp(1, DOCK_FONT / src.font, sp);
-        flip.style.transform = 'translate(' + src.left.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + sc.toFixed(4) + ')';
+        target = Math.min(1, Math.max(0, y / TRAVEL));
+        kick();
       };
 
       if (reduce && flip) { flip.style.display = 'none'; if (ghost) ghost.style.opacity = '1'; }
@@ -479,8 +549,8 @@
      '  if(hit){vec3 p=ro+rd*tt;vec3 n=nrm(p);vec3 v=-rd;vec3 r=reflect(rd,n);vec3 chrome=env(r);',
      '   float fres=pow(1.0-max(dot(n,v),0.0),3.5);',
      '   float sw=sin(p.x*3.0+p.y*3.4+sin(p.z*3.0+t*0.5)*2.0+t*0.25);float veins=smoothstep(0.58,0.92,sw);',
-     '   float cav=smoothstep(0.12,0.0,map(p+n*0.10)-0.10);vec3 blue=vec3(0.05,0.34,1.0);',
-     '   vec3 base=chrome;base=mix(base,blue*1.05,veins*0.42);base+=cav*blue*0.5;',
+     '   float cav=smoothstep(0.12,0.0,map(p+n*0.10)-0.10);vec3 lime=vec3(0.78,0.94,0.30);',
+     '   vec3 base=chrome;base=mix(base,lime*1.05,veins*0.42);base+=cav*lime*0.5;',
      '   vec3 L=normalize(vec3(0.45,0.9,0.6));base+=vec3(1.0)*pow(max(dot(r,L),0.0),120.0)*1.2;',
      '   base+=fres*vec3(0.85,0.9,1.0)*0.55;acc+=base;cov+=1.0;}',
      ' }}',
