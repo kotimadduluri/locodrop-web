@@ -7,6 +7,8 @@
   <meta name="description" content="LocoDrop moves files directly between your phones and computers over your local network. Encrypted end to end, no cloud, no account. Android, iPhone, Windows, Mac and Linux." />
   <meta name="theme-color" content="#c6f04d" />
   <meta name="color-scheme" content="light dark" />
+  <!-- set the chosen theme before first paint (no flash). 'auto' stays unset so CSS follows the OS. -->
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 
   <!-- Open Graph / social -->
   <meta property="og:type" content="website" />
@@ -48,6 +50,11 @@
         <a href="#platforms">Platforms</a>
         <a href="#faq">FAQ</a>
       </nav>
+      <button class="theme-toggle" type="button" data-mode="auto" aria-label="Theme: follow system. Click to switch." title="Theme">
+        <svg class="ic ic-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
+        <svg class="ic ic-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="ic ic-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
       <a class="btn btn-sm btn-primary nav-cta" href="mailto:maddulurikoti@gmail.com?subject=LocoDrop%20early%20access">Get early access <span class="cta-ar" aria-hidden="true">→</span></a>
     </div>
   </header>
@@ -369,6 +376,32 @@
     (function () {
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+      // Theme switcher: cycle Auto → Light → Dark. 'auto' leaves data-theme unset so CSS follows the OS
+      // (and keeps following live OS changes); Light/Dark set it explicitly. Remembered per-browser.
+      (function () {
+        var btn = document.querySelector('.theme-toggle');
+        if (!btn) return;
+        var root = document.documentElement;
+        var modes = ['auto', 'light', 'dark'];
+        var labels = { auto: 'System', light: 'Light', dark: 'Dark' };
+        var get = function () { try { var t = localStorage.getItem('theme'); return (t === 'light' || t === 'dark') ? t : 'auto'; } catch (e) { return 'auto'; } };
+        var apply = function (m) {
+          if (m === 'auto') root.removeAttribute('data-theme');
+          else root.setAttribute('data-theme', m);
+          btn.setAttribute('data-mode', m);
+          var next = modes[(modes.indexOf(m) + 1) % 3];
+          btn.setAttribute('aria-label', 'Theme: ' + labels[m] + '. Click for ' + labels[next] + '.');
+          btn.setAttribute('title', 'Theme: ' + labels[m]);
+          try { window.dispatchEvent(new CustomEvent('themechange')); } catch (e) {}
+        };
+        apply(get());
+        btn.addEventListener('click', function () {
+          var m = modes[(modes.indexOf(get()) + 1) % 3];
+          try { m === 'auto' ? localStorage.removeItem('theme') : localStorage.setItem('theme', m); } catch (e) {}
+          apply(m);
+        });
+      })();
+
       // Scroll-reveal
       var els = document.querySelectorAll('.reveal');
       if (reduce || !('IntersectionObserver' in window)) {
@@ -396,14 +429,22 @@
       // ghost <h1> at the top; as you scroll it shrinks + moves up into the header brand slot,
       // and grows back on scroll up. A single element travelling between the two positions.
       var header = document.querySelector('.site-header');
+      var headerInner = document.querySelector('.header-inner');
       var brand = document.querySelector('.brand');
       var ghost = document.querySelector('.hero-word--ghost');
       var flip = document.querySelector('.hero-word--flip');
-      var DOCK_TOP = 17, DOCK_FONT = 18.9, DOCK_LEFT = 28;  // header brand slot; left is measured (frame is centered)
+      var DOCK_TOP = 17, DOCK_FONT = 17, DOCK_LEFT = 28;    // header brand slot; left is measured (frame is centered)
       var TRAVEL = 260;                                     // scroll distance over which it docks
       var src = null;                                       // measured hero position (viewport, at scroll 0)
+      var shadowStart = 1e9;                                // scrollY past which the hero sheet has cleared the header (shadow may show)
+      var brandWpx = 132;                                   // measured docked-wordmark slot width (px)
 
       var panel = document.querySelector('.hero-panel');
+      // scene layers that drift up + fade as the brand docks (started together, on scroll)
+      var heroStage = document.querySelector('.hero-stage');   // the cube + orbital rings
+      var sceneEls = [document.querySelector('.hero-midlist'), document.querySelector('.hero-how'), document.querySelector('.hero-foot')];
+      var SCENE = 500;                                          // scroll distance over which the scene recedes
+      var sceneActive = false;                                  // so we only clear inline styles once, at the top
 
       // size the wordmark so it spans the full (inset) panel width, like the reference
       var fitWord = function () {
@@ -433,44 +474,83 @@
         var r = ghost.getBoundingClientRect();
         src = { left: r.left, top: r.top + y, font: parseFloat(getComputedStyle(ghost).fontSize) };
         flip.style.fontSize = src.font + 'px';
+        // the header's lift shadow must stay off until the white hero sheet has scrolled behind it,
+        // else the shadow casts a band across the continuous surface (the "two sections" seam)
+        var hh = ghost.parentElement;
+        if (hh && headerInner) shadowStart = hh.getBoundingClientRect().bottom + y - headerInner.getBoundingClientRect().bottom;
+        if (textW > 0) brandWpx = Math.ceil(textW * DOCK_FONT / src.font + 12);
+        // reserve the header brand slot to the ACTUAL docked wordmark width, so it never overlaps the nav
+        var wr = document.createRange(); wr.selectNodeContents(ghost);
+        var textW = wr.getBoundingClientRect().width;
+        if (textW > 0) header.style.setProperty('--brand-w', Math.ceil(textW * DOCK_FONT / src.font + 12) + 'px');
         flip.classList.add('ready');
-        if (!reduce) { target = curp = Math.min(1, Math.max(0, window.scrollY / TRAVEL)); render(curp); }
+        if (!reduce) render();
       };
       var lerp = function (a, b, t) { return a + (b - a) * t; };
       // easeInOutCubic — accelerate out of the hero, decelerate into the header slot
       var easeInOut = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
 
-      // The hand-off is smoothed: raw scroll only sets a TARGET; a rAF loop eases the rendered
-      // progress toward it, so the wordmark glides with weight instead of stepping frame-for-frame
-      // with the wheel. That inertia — plus the eased curve — is what makes it feel rich.
-      var target = 0, curp = 0, ticking = false;
-      var render = function (p) {
-        var e = easeInOut(p);                              // coordinated position curve
-        var es = easeInOut(Math.min(1, p / 0.62));         // scale leads slightly (shrinks before it seats)
-        var ty = lerp(src.top, DOCK_TOP, e);               // rises from the hero into the header slot
-        var tx = lerp(src.left, DOCK_LEFT, e);             // slides from the hero edge to the header content-left
+      // Drive the hand-off directly from scroll (tight — no laggy inertia). The flip starts from the
+      // wordmark's NATURAL scrolled position (src.top - y) so it overlays the resting <h1> exactly at
+      // all times, then eases up + shrinks into the header slot. The eased curve gives it weight; the
+      // exact overlay makes the shared element seamless (no jump when the overlay takes over).
+      var wraf = null;
+      var render = function () {
+        if (!src) return;
+        var y = window.scrollY;
+        var p = Math.min(1, Math.max(0, y / TRAVEL));
+        var e = easeInOut(p);
+        var es = easeInOut(Math.min(1, p / 0.62));         // scale LEADS the arc: shrink early so the wordmark is small by the time the curve reaches the nav row (no mid-flight overlap)
+        // the brand's BACKGROUND (the header sheet) morphs on the same eased progress as the
+        // wordmark — flush opaque sheet → frosted bar (see .header-inner --dock in CSS). The lift
+        // shadow is held on --float until the hero sheet clears, so header + hero stay one surface.
+        if (headerInner) {
+          headerInner.style.setProperty('--dock', e.toFixed(3));
+          headerInner.style.setProperty('--float', Math.min(1, Math.max(0, (y - shadowStart) / 60)).toFixed(3));
+        }
+        // Open the nav's brand slot as the wordmark nears the top (dock > .4) so the nav glides clear
+        // of the docking wordmark — no overlap at any point, and no empty gap at the top (dock < .4).
+        if (brand) brand.style.width = (brandWpx * Math.min(1, Math.max(0, (e - 0.4) / 0.6))).toFixed(1) + 'px';
+        // CURVED hand-off: instead of a straight line, the wordmark rides a quadratic bézier. The
+        // control point sits at (dock-x, start-y) so the path curves horizontally toward the slot
+        // FIRST (staying low, shrinking) then sweeps UP into place at the end — a graceful arc that
+        // also keeps the still-large wordmark clear of the top-centre nav the whole way. Endpoints
+        // stay exact (e=0 rests over the ghost, e=1 lands in the slot); only the middle curves.
+        var natTop = src.top - y;                          // where the resting wordmark sits as the page scrolls
+        var P0x = src.left, P0y = natTop, P1x = DOCK_LEFT, P1y = DOCK_TOP;
+        var Cx = P1x, Cy = P0y;                            // corner control point → left-and-low, then up
+        var mt = 1 - e;
+        var tx = mt * mt * P0x + 2 * mt * e * Cx + e * e * P1x;
+        var ty = mt * mt * P0y + 2 * mt * e * Cy + e * e * P1y;
         var sc = lerp(1, DOCK_FONT / src.font, es);
         flip.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px,0) scale(' + sc.toFixed(4) + ')';
-        // crossfade the fixed overlay in over the identical resting wordmark — seamless, no binary pop
-        var vis = Math.min(1, p * 14);
+        // flip fades in exactly over the identical resting wordmark it overlays — no visible swap
+        var vis = Math.min(1, p * 10);
         flip.style.opacity = vis;
         ghost.style.opacity = 1 - vis;
-      };
-      var tick = function () {
-        curp += (target - curp) * 0.16;                    // inertial ease toward the scroll target
-        if (Math.abs(target - curp) < 0.0004) { curp = target; ticking = false; }
-        render(curp);
-        if (ticking) requestAnimationFrame(tick);
-      };
-      var kick = function () { if (!ticking) { ticking = true; requestAnimationFrame(tick); } };
 
+        // The scene recedes WITH the brand: the cube + bottom sections drift up and fade as you scroll,
+        // beginning the moment the brand starts docking. Cleared back to defaults at the very top so the
+        // cube's own fade-in and the "How it works?" hover still work.
+        var sp = Math.min(1, y / SCENE);
+        if (sp > 0.0005) {
+          sceneActive = true;
+          var op = (1 - sp).toFixed(3);
+          var cubeLift = (-sp * 130).toFixed(1);           // the cube rises noticeably — reads as "moving up"
+          var textLift = (-sp * 84).toFixed(1);            // bottom sections rise a bit less → parallax depth
+          if (heroStage) { heroStage.style.opacity = op; heroStage.style.transform = 'translate3d(0,' + cubeLift + 'px,0) scale(' + (1 - sp * 0.05).toFixed(3) + ')'; }
+          for (var i = 0; i < sceneEls.length; i++) if (sceneEls[i]) { sceneEls[i].style.opacity = op; sceneEls[i].style.transform = 'translate3d(0,' + textLift + 'px,0)'; }
+        } else if (sceneActive) {
+          sceneActive = false;
+          if (heroStage) { heroStage.style.opacity = ''; heroStage.style.transform = ''; }
+          for (var j = 0; j < sceneEls.length; j++) if (sceneEls[j]) { sceneEls[j].style.opacity = ''; sceneEls[j].style.transform = ''; }
+        }
+      };
       var onScroll = function () {
         var y = window.scrollY;
         header.classList.toggle('scrolled', y > TRAVEL * 0.6);
-        if (!src || !flip) return;
-        if (reduce) return;                                // reduced-motion path handled in CSS
-        target = Math.min(1, Math.max(0, y / TRAVEL));
-        kick();
+        if (!src || !flip || reduce) return;               // reduced-motion path handled in CSS
+        if (!wraf) wraf = requestAnimationFrame(function () { wraf = null; render(); });
       };
 
       if (reduce && flip) { flip.style.display = 'none'; if (ghost) ghost.style.opacity = '1'; }
@@ -532,7 +612,7 @@
     var vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
     var fs=`
   precision highp float;
-  uniform vec2 u_res; uniform float u_time; uniform sampler2D u_atlas;
+  uniform vec2 u_res; uniform float u_time; uniform sampler2D u_atlas; uniform float u_light;
   mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
   float sdBox(vec3 p, vec3 b, float r){ vec3 q=abs(p)-b; return length(max(q,0.0))+min(max(q.x,max(q.y,q.z)),0.0)-r; }
 
@@ -541,7 +621,7 @@
   // a stack of individual rounded cubies with gaps between them (premium beveled blocks)
   float map(vec3 p){
     float t=u_time*0.20;
-    vec3 q=p; q.yz*=rot(-0.52+t*0.42); q.xz*=rot(t+0.72);   // tumble on two axes → rotates fully around
+    vec3 q=p; q.yz*=rot(-0.52+sin(t*0.5)*0.14); q.xz*=rot(t+0.72); // 360° turntable yaw + gentle pitch sway (never an awkward angle)
     q *= 1.50;                                               // shrink the cube in view (~67%) for breathing room
     vec3 cid = clamp(floor(q/CELL) + 0.5, -LIM, LIM);      // half-integer centers = every cubie identical size
     vec3 lp = q - cid*CELL;
@@ -559,6 +639,10 @@
     vec3 lo = vec3(0.032,0.045,0.028);                    // dark green floor
     vec3 mid= vec3(0.062,0.095,0.048);                    // dark green (sides)
     vec3 hi = vec3(0.100,0.145,0.072);                    // dark studio top — same hue, only slightly lifted
+    // light theme: a brighter, more vibrant lime cube so it reads well on the white hero
+    lo  = mix(lo,  vec3(0.16,0.22,0.10), u_light);
+    mid = mix(mid, vec3(0.34,0.46,0.18), u_light);
+    hi  = mix(hi,  vec3(0.60,0.80,0.30), u_light);
     vec3 c = mix(lo, mid, smoothstep(-0.6,0.12,y));
     c = mix(c, hi, smoothstep(0.12,0.95,y));
     c += vec3(0.46,0.70,0.29)*pow(max(y,0.0),2.8)*0.09;   // faint key wash from above (soft, not harsh)
@@ -583,7 +667,7 @@
         vec3 keyDir=normalize(vec3(-0.30,0.92,0.35));
         float diff=max(dot(n,keyDir),0.0);
         vec3 refl=env(r);
-        vec3 base=vec3(0.022,0.028,0.016);                 // near-black green resin
+        vec3 base=mix(vec3(0.022,0.028,0.016), vec3(0.11,0.14,0.07), u_light); // lighter resin in light theme
         vec3 col=base;
         col += refl * 0.55;                                // soft reflection shapes the bevels (studio look)
         col += vec3(0.46,0.70,0.29)*diff*0.08;             // gentle directional key — subtle form
@@ -591,12 +675,12 @@
         col += vec3(0.85,0.95,0.70)*pow(max(dot(r,keyDir),0.0),64.0)*0.07; // small specular glint
         // gentle vertical grade: dark overall, but even (no crush to black at tumbled angles)
         float vfall=smoothstep(-0.7,0.55,p.y);
-        col *= (0.24 + 0.60*vfall);
+        col *= ((0.24 + 0.34*u_light) + (0.60 - 0.12*u_light)*vfall);  // higher floor in light so it's not a dark blob
         // --- faint file/device watermark stamped on each cubie face (tracks the cube's rotation) ---
         float t2=u_time*0.20;
-        vec3 qb=p; qb.yz*=rot(-0.52+t2*0.42); qb.xz*=rot(t2+0.72); qb*=1.50; // hit point in cube-object space (same tumble)
+        vec3 qb=p; qb.yz*=rot(-0.52+sin(t2*0.5)*0.14); qb.xz*=rot(t2+0.72); qb*=1.50; // hit point in cube-object space (same motion)
         vec3 cb=clamp(floor(qb/CELL)+0.5,-LIM,LIM); vec3 lb=qb-cb*CELL; // this cubie + local pos on it
-        vec3 nb=n; nb.yz*=rot(-0.52+t2*0.42); nb.xz*=rot(t2+0.72);     // normal in object space (face axis)
+        vec3 nb=n; nb.yz*=rot(-0.52+sin(t2*0.5)*0.14); nb.xz*=rot(t2+0.72); // normal in object space (face axis)
         vec3 an=abs(nb); vec2 fuv; vec2 kk;
         if(an.y>=an.x && an.y>=an.z){ fuv=lb.xz; kk=vec2(cb.x,cb.z); }
         else if(an.x>=an.z){ fuv=lb.zy; kk=vec2(cb.z,cb.y); }
@@ -629,6 +713,15 @@
     gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
     var loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
     var uRes=gl.getUniformLocation(pr,'u_res'),uTime=gl.getUniformLocation(pr,'u_time');
+    var uLight=gl.getUniformLocation(pr,'u_light');
+    // brighten the cube in light theme; follows the toggle + live OS changes
+    var effLight=function(){var t=document.documentElement.getAttribute('data-theme');
+      if(t==='light')return 1; if(t==='dark')return 0;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches?0:1;};
+    var lightVal=effLight();
+    var setLight=function(){lightVal=effLight();};
+    window.addEventListener('themechange',setLight);
+    try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',setLight);}catch(e){}
     // build an 8-icon atlas (file + device glyphs) and bind it — sampled per cubie face in the shader
     (function(){
       var C=document.createElement('canvas'); C.width=512; C.height=256; var x=C.getContext('2d');
@@ -661,7 +754,7 @@
     var fb=document.querySelector('.orb'); if(fb) fb.style.opacity='0';
     var start=null,raf=null,visible=true;
     function frame(ts){if(start===null)start=ts;var tm=reduce?0.7:(ts-start)/1000;
-      size();gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,tm);
+      size();gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uTime,tm);gl.uniform1f(uLight,lightVal);
       gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
       raf=(!reduce&&visible)?requestAnimationFrame(frame):null;}
     raf=requestAnimationFrame(frame);
