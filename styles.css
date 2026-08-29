@@ -185,7 +185,7 @@ main { position: relative; z-index: 2; }
 }
 
 /* ---------- Hero ---------- */
-.hero { position: relative; padding: clamp(48px, 8vw, 88px) 0 clamp(48px, 7vw, 80px); overflow: hidden; }
+.hero { position: relative; padding: 16px 0 clamp(40px, 6vw, 72px); overflow: hidden; }
 .hero::before {
   content: ""; position: absolute; z-index: 0;
   top: -22%; right: -8%; width: 62vw; height: 62vw; max-width: 780px; max-height: 780px;
@@ -580,6 +580,7 @@ main { position: relative; z-index: 2; }
   background-size: 240% 100%; background-position: 170% 0;
   -webkit-background-clip: text; background-clip: text; color: transparent;
   animation: wordSheen 5.5s cubic-bezier(.5, 0, .2, 1) infinite;
+  transform-origin: 50% 0; will-change: transform, opacity;
 }
 .hero-word .dot { color: var(--accent); -webkit-text-fill-color: var(--accent); }
 @keyframes wordSheen { 0% { background-position: 170% 0; } 60%, 100% { background-position: -30% 0; } }

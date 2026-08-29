@@ -367,9 +367,21 @@
         animSections.forEach(function (el) { animIo.observe(el); });
       }
 
-      // Header hairline once scrolled
+      // Shared brand transition: the giant hero wordmark shrinks + fades as the nav
+      // logo takes over on scroll, so the app name reads as one element handing off.
       var header = document.querySelector('.site-header');
-      var onScroll = function () { header.classList.toggle('scrolled', window.scrollY > 8); };
+      var heroWord = document.querySelector('.hero-word');
+      var heroSection = document.querySelector('.hero');
+      var onScroll = function () {
+        var y = window.scrollY;
+        var h = heroSection ? heroSection.offsetHeight : 640;
+        var p = Math.min(1, y / (h * 0.55));          // progress over the first ~55% of the hero
+        header.classList.toggle('scrolled', p > 0.32); // nav logo fades in as the wordmark shrinks
+        if (heroWord && !reduce) {
+          heroWord.style.transform = 'scale(' + (1 - p * 0.46).toFixed(3) + ')';
+          heroWord.style.opacity = Math.max(0, 1 - p * 1.2).toFixed(3);
+        }
+      };
       onScroll();
       window.addEventListener('scroll', onScroll, { passive: true });
 
