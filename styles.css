@@ -154,14 +154,17 @@ img, svg { display: block; }
   border-radius: 0 0 var(--radius) var(--radius);
   box-shadow: 0 14px 32px -20px rgba(20, 40, 90, .32);
 }
-/* brand is collapsed at the top; it slides + fades in as you scroll (shared hand-off from the hero wordmark) */
+/* brand is collapsed at the top; it slides + fades in as you scroll (shared hand-off from the hero wordmark).
+   Sits in a white chip (reference), separated from the header by a hairline + soft shadow. */
 .brand {
-  display: inline-flex; align-items: center; gap: 10px; color: var(--text);
-  font-weight: 700; font-family: var(--font-display); letter-spacing: -0.03em; font-size: 1.14rem;
+  display: inline-flex; align-items: center; gap: 9px; color: var(--text);
+  font-weight: 700; font-family: var(--font-display); letter-spacing: -0.03em; font-size: 1.06rem;
   max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; transform: translateX(-8px);
-  transition: max-width .45s var(--ease), opacity .3s var(--ease), transform .45s var(--ease);
+  background: var(--surface-1); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+  border-radius: var(--pill); padding: 0;
+  transition: max-width .45s var(--ease), opacity .3s var(--ease), transform .45s var(--ease), padding .45s var(--ease);
 }
-.site-header.scrolled .brand { max-width: 220px; opacity: 1; transform: none; }
+.site-header.scrolled .brand { max-width: 220px; opacity: 1; transform: none; padding: 7px 16px 7px 11px; }
 .brand-mark { display: inline-flex; color: var(--accent); flex-shrink: 0; }
 .nav-pill { display: flex; align-items: center; gap: 2px; background: var(--bg-deep); border-radius: 14px; padding: 5px; }
 .nav-pill a { color: var(--text-muted); font-size: .92rem; font-weight: 600; padding: 8px 15px; border-radius: 10px; transition: color .16s var(--ease), background-color .16s var(--ease); }
