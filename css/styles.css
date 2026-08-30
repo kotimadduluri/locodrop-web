@@ -857,11 +857,20 @@ main { position: relative; z-index: 2; }
   .orbwrap { width: min(66vw, 360px); height: min(66vw, 360px); margin-top: 40px; }
 }
 @media (max-width: 620px) {
-  .hero-panel { min-height: 0; padding-bottom: 20px; }
+  /* Phone: fill the screen and vertically CENTER the hero as one group (wordmark + cube + pill +
+     lede), instead of top-loading it with a big white gap above and empty grey below. */
+  .hero-panel {
+    min-height: 100svh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding-bottom: 20px;
+  }
+  /* drop the white "brand sheet" block on phones — with the centered layout it would float as a
+     second white slab under the white header; the wordmark reads cleanly on the hero surface. */
+  .hero-head { background: transparent; border-radius: 0; clip-path: none; padding: 0 var(--hero-inset); }
   /* pre-JS fallback size; JS fitWord() then sizes it to SPAN the panel exactly (floor 22px).
      No side padding here — the .hero-head's --hero-inset already insets it, and fitWord measures
      against THAT; a second 20px pad on the word would make fitWord oversize the text and clip it. */
-  .hero-word { font-size: clamp(30px, 10vw, 88px); padding: 44px 0 0; }
+  .hero-word { font-size: clamp(30px, 10vw, 88px); padding: 0; }
   .hero-foot { position: static; height: auto; flex-direction: column; align-items: stretch; padding: 22px 20px 6px; }
   .hero-stage { position: relative; inset: auto; height: 280px; margin-top: 4px; }
   .orbwrap { margin-top: 0; width: min(74vw, 300px); height: min(74vw, 300px); }
