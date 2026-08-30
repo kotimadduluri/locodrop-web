@@ -132,26 +132,35 @@
           headerInner.style.setProperty('--dock', e.toFixed(3));
           headerInner.style.setProperty('--float', Math.min(1, Math.max(0, (y - shadowStart) / 60)).toFixed(3));
         }
-        // Open the nav's brand slot as the wordmark nears the top (dock > .4) so the nav glides clear
-        // of the docking wordmark — no overlap at any point, and no empty gap at the top (dock < .4).
-        if (brand) brand.style.width = (brandWpx * Math.min(1, Math.max(0, (e - 0.4) / 0.6))).toFixed(1) + 'px';
-        // CURVED hand-off: instead of a straight line, the wordmark rides a quadratic bézier. The
-        // control point sits at (dock-x, start-y) so the path curves horizontally toward the slot
-        // FIRST (staying low, shrinking) then sweeps UP into place at the end — a graceful arc that
-        // also keeps the still-large wordmark clear of the top-centre nav the whole way. Endpoints
-        // stay exact (e=0 rests over the ghost, e=1 lands in the slot); only the middle curves.
-        var natTop = src.top - y;                          // where the resting wordmark sits as the page scrolls
-        var P0x = src.left, P0y = natTop, P1x = DOCK_LEFT, P1y = DOCK_TOP;
-        var Cx = P1x, Cy = P0y;                            // corner control point → left-and-low, then up
-        var mt = 1 - e;
-        var tx = mt * mt * P0x + 2 * mt * e * Cx + e * e * P1x;
-        var ty = mt * mt * P0y + 2 * mt * e * Cy + e * e * P1y;
-        var sc = lerp(1, DOCK_FONT / src.font, es);
-        flip.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px,0) scale(' + sc.toFixed(4) + ')';
-        // flip fades in exactly over the identical resting wordmark it overlays — no visible swap
-        var vis = Math.min(1, p * 10);
-        flip.style.opacity = vis;
-        ghost.style.opacity = 1 - vis;
+        // On phones the wordmark→header dock is OFF: the mobile header packs the toggle + CTA to the
+        // right (flex-end), so a wordmark docking into the left brand slot would collide with them.
+        // Keep the big resting wordmark in the hero, hide the traveling overlay, reserve no brand slot.
+        if (window.innerWidth <= 760) {
+          flip.style.opacity = 0;
+          ghost.style.opacity = 1;
+          if (brand) brand.style.width = '0px';
+        } else {
+          // Open the nav's brand slot as the wordmark nears the top (dock > .4) so the nav glides clear
+          // of the docking wordmark — no overlap at any point, and no empty gap at the top (dock < .4).
+          if (brand) brand.style.width = (brandWpx * Math.min(1, Math.max(0, (e - 0.4) / 0.6))).toFixed(1) + 'px';
+          // CURVED hand-off: instead of a straight line, the wordmark rides a quadratic bézier. The
+          // control point sits at (dock-x, start-y) so the path curves horizontally toward the slot
+          // FIRST (staying low, shrinking) then sweeps UP into place at the end — a graceful arc that
+          // also keeps the still-large wordmark clear of the top-centre nav the whole way. Endpoints
+          // stay exact (e=0 rests over the ghost, e=1 lands in the slot); only the middle curves.
+          var natTop = src.top - y;                          // where the resting wordmark sits as the page scrolls
+          var P0x = src.left, P0y = natTop, P1x = DOCK_LEFT, P1y = DOCK_TOP;
+          var Cx = P1x, Cy = P0y;                            // corner control point → left-and-low, then up
+          var mt = 1 - e;
+          var tx = mt * mt * P0x + 2 * mt * e * Cx + e * e * P1x;
+          var ty = mt * mt * P0y + 2 * mt * e * Cy + e * e * P1y;
+          var sc = lerp(1, DOCK_FONT / src.font, es);
+          flip.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px,0) scale(' + sc.toFixed(4) + ')';
+          // flip fades in exactly over the identical resting wordmark it overlays — no visible swap
+          var vis = Math.min(1, p * 10);
+          flip.style.opacity = vis;
+          ghost.style.opacity = 1 - vis;
+        }
 
         // The scene recedes WITH the brand: the cube + bottom sections drift up and fade as you scroll,
         // beginning the moment the brand starts docking. Cleared back to defaults at the very top so the

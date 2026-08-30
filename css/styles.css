@@ -660,6 +660,9 @@ main { position: relative; z-index: 2; }
 @media (max-width: 620px) {
   .mesh-lead { font-size: .72rem; letter-spacing: .08em; padding: 0 8px; }
 }
+/* The platform fallback chips carry an "online" dot at right:11px — give the label room so the
+   dot never sits on top of the last letter (iPhone/Windows/Linux). */
+.mesh-fallback .chip { padding-right: 28px; }
 
 @media (max-width: 940px) {
   .hero-grid { grid-template-columns: 1fr; }
