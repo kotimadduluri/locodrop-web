@@ -5,7 +5,6 @@
 :root {
   --accent: #c6f04d;                  /* reference lime/chartreuse (fills; use dark text on it) */
   --accent-strong: #b2e236;           /* deeper lime for hover */
-  --accent-soft: #ddf784;
   --accent-ink: #0a0b0e;              /* text on accent — dark, lime is a light fill */
   --accent-glow: 198, 240, 77;        /* rgb lime, used at low alpha */
 
@@ -16,7 +15,6 @@
   --bg: #fbfbfd;
   --bg-deep: #f2f3f7;                 /* recessed panels */
   --surface-1: #ffffff;               /* cards, header */
-  --surface-1-rgb: 255, 255, 255;     /* header glass (translucent nav on scroll) */
   --cube-shadow: rgba(16, 26, 52, 0.42);  /* ground contact shadow under the hero cube */
   --surface-2: #f4f5f8;               /* device body, chips */
   --surface-3: #e9ebf0;               /* device screens */
@@ -59,7 +57,6 @@
   :root:not([data-theme="light"]) {
     --accent: #c8f24f;               /* lime holds up on dark too */
     --accent-strong: #d7f96e;
-    --accent-soft: #a9d53f;
     --accent-ink: #0a0b0e;           /* dark text on lime */
     --accent-glow: 200, 242, 79;
 
@@ -70,7 +67,6 @@
     --bg: #0c0f15;
     --bg-deep: #0b0d12;
     --surface-1: #101319;
-    --surface-1-rgb: 16, 19, 25;
     --cube-shadow: rgba(0, 0, 0, 0.55);
     --surface-2: #161a22;
     --surface-3: #1e232d;
@@ -91,7 +87,6 @@
 :root[data-theme="dark"] {
   --accent: #c8f24f;
   --accent-strong: #d7f96e;
-  --accent-soft: #a9d53f;
   --accent-ink: #0a0b0e;
   --accent-glow: 200, 242, 79;
 
@@ -102,7 +97,6 @@
   --bg: #0c0f15;
   --bg-deep: #0b0d12;
   --surface-1: #101319;
-  --surface-1-rgb: 16, 19, 25;
   --cube-shadow: rgba(0, 0, 0, 0.55);
   --surface-2: #161a22;
   --surface-3: #1e232d;
@@ -339,73 +333,6 @@ main { position: relative; z-index: 2; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
 .hero-note { margin-top: 22px; font-size: .92rem; color: var(--text-faint); }
 
-/* --- Interactive transfer demo --- */
-/* wrap reserves the scaled footprint; stage is a fixed 460x404 coordinate space
-   scaled to fit, so the packet's pixel offset-path always aligns with the devices. */
-.stage-wrap { position: relative; width: 100%; max-width: 460px; margin: 0 auto; aspect-ratio: 460 / 404; perspective: 1200px; }
-.stage {
-  position: absolute; left: 50%; top: 50%; width: 460px; height: 404px;
-  transform-style: preserve-3d;
-  transform: translate(-50%, -50%) scale(var(--s, 1))
-             rotateX(calc(var(--ry, 0) * -4deg)) rotateY(calc(var(--rx, 0) * 6deg));
-  transition: transform .3s var(--ease);
-}
-.stage-glass {
-  position: absolute; inset: 0; border-radius: var(--radius-lg);
-  background: linear-gradient(150deg, color-mix(in srgb, var(--surface-1) 90%, transparent), color-mix(in srgb, var(--bg-deep) 85%, transparent));
-  border: 1px solid var(--line); box-shadow: var(--shadow-lift);
-  overflow: hidden;
-}
-.stage-glass::before { /* soft interior accent wash */
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(120% 90% at 78% 12%, rgba(var(--accent-glow), .16), transparent 55%);
-}
-.stage-label {
-  position: absolute; top: 16px; left: 18px; z-index: 4;
-  display: inline-flex; align-items: center; gap: 7px;
-  font-size: .72rem; font-weight: 600; letter-spacing: .02em; color: var(--text-muted);
-}
-.stage-label .lk { width: 13px; height: 13px; color: var(--accent); }
-
-/* devices */
-.dev { position: absolute; background: var(--surface-2); border: 1px solid var(--line-strong); box-shadow: var(--shadow); }
-.dev-screen { position: absolute; background: var(--surface-3); border-radius: 6px; overflow: hidden; }
-.dev-phone { width: 26%; aspect-ratio: 9 / 18.5; border-radius: 16px; left: 11%; bottom: 12%; z-index: 3; }
-.dev-phone .dev-screen { inset: 7% 8%; border-radius: 9px; }
-.dev-laptop { width: 44%; aspect-ratio: 16 / 10; border-radius: 9px 9px 3px 3px; right: 9%; top: 16%; z-index: 3; }
-.dev-laptop .dev-screen { inset: 8% 7% 10%; }
-.dev-laptop .base { position: absolute; left: -13%; right: -13%; bottom: -8%; height: 8%; background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: 0 0 6px 6px; }
-
-/* thumbnails inside screens: little "files" */
-.tile { position: absolute; border-radius: 4px; background: color-mix(in srgb, var(--text) 8%, transparent); }
-.dev-laptop .dev-screen .tile { width: 22%; height: 26%; }
-.tile.a { left: 10%; top: 16%; } .tile.b { left: 39%; top: 16%; } .tile.c { left: 68%; top: 16%; }
-.tile.d { left: 10%; top: 54%; } .tile.e { left: 39%; top: 54%; }
-.tile.landed { background: color-mix(in srgb, var(--accent) 40%, transparent); animation: pop .5s var(--ease-snap); }
-@keyframes pop { 0% { transform: scale(.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-/* the encrypted link path */
-.link-svg { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; overflow: visible; }
-.link-track { fill: none; stroke: color-mix(in srgb, var(--accent) 34%, transparent); stroke-width: 2; stroke-dasharray: 3 7; stroke-linecap: round; }
-.link-flow { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round;
-  stroke-dasharray: 26 320; animation: flow 2.6s linear infinite; }
-@keyframes flow { to { stroke-dashoffset: -346; } }
-
-/* the packet that hops between devices */
-.packet {
-  position: absolute; z-index: 5; top: 0; left: 0;
-  width: 40px; height: 48px; margin: -24px 0 0 -20px;
-  offset-path: path("M 128 300 C 190 150, 250 150, 320 132");
-  offset-rotate: 0deg;
-  animation: hop 2.6s cubic-bezier(.5, 0, .5, 1) infinite;
-  filter: drop-shadow(0 6px 14px rgba(var(--accent-glow), .4));
-}
-@keyframes hop {
-  0%   { offset-distance: 0%; opacity: 0; transform: scale(.7); }
-  8%   { opacity: 1; transform: scale(1); }
-  92%  { opacity: 1; transform: scale(1); }
-  100% { offset-distance: 100%; opacity: 0; transform: scale(.7); }
-}
 .packet-card {
   position: relative; width: 100%; height: 100%;
   background: var(--surface-1); border: 1px solid var(--line-strong);
@@ -423,9 +350,6 @@ main { position: relative; z-index: 2; }
 .packet-lock svg { width: 11px; height: 11px; }
 
 @media (prefers-reduced-motion: reduce) {
-  /* keep the fit-scale (--s), drop only the parallax tilt (rx/ry stay 0 unset) */
-  .link-flow { animation: none; stroke-dasharray: none; opacity: .8; }
-  .packet { animation: none; offset-distance: 46%; }
   .status-pill .dot::after { animation: none; opacity: 0; }
   /* JS render() is skipped for reduced motion, so dock the header sheet at the scroll threshold instead */
   .site-header.scrolled .header-inner { --dock: 1; --float: 1; }
@@ -433,8 +357,6 @@ main { position: relative; z-index: 2; }
 
 /* Off-screen animation pause (perf + calm): only the section in view animates. JS toggles .anim-paused when
    a section scrolls out of the viewport; reduced-motion already disables these animations entirely. */
-.anim-paused .packet,
-.anim-paused .link-flow,
 .anim-paused .status-pill .dot::after,
 .anim-paused .beam,
 .anim-paused .mesh-links .flow use,
@@ -718,10 +640,29 @@ main { position: relative; z-index: 2; }
 }
 
 /* ---------- Responsive ---------- */
+/* The page is a fixed-width card floating on a grey backdrop with big side margins (--frame-gap) —
+   a desktop device. On smaller screens that margin steals width, so it steps down, and on phones it
+   collapses to 0 (full-bleed) — the grey backdrop + blueprint dots are a desktop-only flourish. */
+@media (max-width: 1080px) { :root { --frame-gap: clamp(40px, 9vw, 144px); } }
+@media (max-width: 760px)  { :root { --frame-gap: 0px; } }   /* phones: full-bleed, edge to edge */
+
+/* Phone header: nav-pill is already hidden (the hero wordmark IS the brand), so tighten the padding
+   and compact the CTA (drop its arrow) so toggle + CTA never overflow the row on a narrow screen. */
+@media (max-width: 760px) {
+  /* pack toggle + CTA to the right edge (flex-end) — margin-left:auto on the toggle mis-distributes
+     the free space here and pushes the trailing CTA off-screen; flex-end keeps them both on-screen. */
+  .header-inner { padding: 12px 16px; gap: 10px; justify-content: flex-end; }
+  .theme-toggle { margin-left: 0; }
+  .nav-cta { padding: 9px 14px; font-size: .86rem; }
+  .nav-cta .cta-ar { display: none; }
+}
+/* Phone: the uppercase, letter-spaced mesh eyebrow is too wide for one line — ease it so it wraps cleanly. */
+@media (max-width: 620px) {
+  .mesh-lead { font-size: .72rem; letter-spacing: .08em; padding: 0 8px; }
+}
+
 @media (max-width: 940px) {
   .hero-grid { grid-template-columns: 1fr; }
-  .stage-wrap { order: -1; }
-  .stage { max-width: 420px; }
   .how-grid { grid-template-columns: 1fr; gap: 28px; }
   .how-sticky { position: static; }
 }
@@ -760,12 +701,6 @@ main { position: relative; z-index: 2; }
 }
 .hero-panel.in .hero-head { clip-path: inset(0 0 0 0 round 0 0 36px 36px); }
 
-/* in-panel nav: links-pill left, CTA right, no logo (the wordmark is the brand) */
-.hero-nav {
-  position: relative; z-index: 6;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 20px 22px 0;
-}
 
 .hero-pill { position: static; margin: 0; align-self: flex-start; }
 
@@ -920,12 +855,13 @@ main { position: relative; z-index: 2; }
 }
 @media (max-width: 620px) {
   .hero-panel { min-height: 0; padding-bottom: 20px; }
-  .hero-word { font-size: clamp(40px, 13vw, 88px); padding: 44px 20px 0; }
+  /* pre-JS fallback size; JS fitWord() then sizes it to SPAN the panel exactly (floor 22px).
+     No side padding here — the .hero-head's --hero-inset already insets it, and fitWord measures
+     against THAT; a second 20px pad on the word would make fitWord oversize the text and clip it. */
+  .hero-word { font-size: clamp(30px, 10vw, 88px); padding: 44px 0 0; }
   .hero-foot { position: static; height: auto; flex-direction: column; align-items: stretch; padding: 22px 20px 6px; }
   .hero-stage { position: relative; inset: auto; height: 280px; margin-top: 4px; }
   .orbwrap { margin-top: 0; width: min(74vw, 300px); height: min(74vw, 300px); }
-  .hero-actions { flex-direction: column; }
-  .hero-actions .btn { width: 100%; }
 }
 
 /* ============================================================
