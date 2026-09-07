@@ -261,6 +261,7 @@ img, svg { display: block; }
    the nav; the 132px fallback covers first paint before JS measures. */
 .site-header.scrolled .brand { width: var(--brand-w, 132px); }
 .brand-mark { display: inline-flex; color: var(--accent); flex-shrink: 0; }
+.brand-mark img { display: block; width: 22px; height: 22px; border-radius: 6px; }
 .nav-pill { display: flex; align-items: center; gap: 2px; background: var(--bg-deep); border-radius: 16px; padding: 6px; flex-shrink: 0; }
 .nav-pill a { color: var(--text-muted); font-size: 1rem; font-weight: 600; padding: 11px 19px; border-radius: 11px; white-space: nowrap; transition: color .16s var(--ease), background-color .16s var(--ease); }
 .nav-pill a:hover { color: var(--text); background: var(--surface-1); }

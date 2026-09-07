@@ -15,8 +15,11 @@ js/app.js           UI: theme toggle, scroll reveals, the hero wordmark "flip"
                     dock transition, scene fade/lift on scroll, mesh animation.
 js/cube.js          WebGL raymarched "data cube" (canvas #orbGL), with a CSS
                     fallback orb if WebGL is unavailable.
-assets/favicon.svg  Tab icon.
-assets/og.svg       Social share image (see note below re: PNG).
+assets/favicon-32.png      Tab icon (32px). Courier-dove app icon.
+assets/icon-192.png        192px mark — favicon (hi-dpi) + footer brand mark.
+assets/apple-touch-icon.png 180px iOS home-screen icon.
+assets/icon-512.png        512px mark (spare / large use).
+assets/og.svg              Social share image; embeds the dove mark (see note below re: PNG).
 .nojekyll           Serve files as-is (so js/ and css/ folders work).
 ```
 
@@ -70,7 +73,7 @@ git add -A && git commit -m "update site" && git push
 
 - "LocoDrop" is a **working name**, not cleared for public launch. If the product
   is renamed, update the copy in `index.html`, the `<title>`/OG/JSON-LD tags, and
-  the marks in `assets/favicon.svg` / `assets/og.svg`.
+  the marks in `assets/*.png` (regenerate from the app icon) / `assets/og.svg`.
 - The "Get early access" buttons are `mailto:` links. Swap in a real form/backend
   when one exists.
 - `assets/og.svg` is a vector social card. Most social scrapers don't render SVG —
